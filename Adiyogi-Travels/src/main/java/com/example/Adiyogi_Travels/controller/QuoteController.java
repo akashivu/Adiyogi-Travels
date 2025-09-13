@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.*;
 public class QuoteController {
     private final FareService fareService;
 
-
     @PostMapping("/quote")
     public QuoteResponse getQuote(@RequestBody QuoteRequest req) {
 
         double distanceKm = 25.4;
         int durationMin = 45;
+
         return fareService.compute(distanceKm, durationMin, req.getVehicleCategory());
     }
 }
