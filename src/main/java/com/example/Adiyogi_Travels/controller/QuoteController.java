@@ -4,6 +4,7 @@ import com.example.Adiyogi_Travels.dto.QuoteRequest;
 import com.example.Adiyogi_Travels.dto.QuoteResponse;
 import com.example.Adiyogi_Travels.repository.VehicleRepository;
 import com.example.Adiyogi_Travels.service.FareService;
+import com.example.Adiyogi_Travels.service.GoogleMapsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,23 +17,25 @@ import java.util.List;
 public class QuoteController {
     private final FareService fareService;
     private final VehicleRepository vehicleRepository;
-
+    private final GoogleMapsService googleMapsService;
     @PostMapping("/quotes")
     public List<QuoteResponse> getQuotes(@RequestBody QuoteRequest req) {
+        double distanceKm = googleMapsService.getDistance(req.getPickup(), req.getDropoff());
+
         var vehicles = vehicleRepository.findAll();
         return vehicles.stream().map(v -> {
             double ratePerKm = "roundtrip".equalsIgnoreCase(req.getTripType())
                     ? v.getRoundTripRatePerKm()
                     : v.getOneWayRatePerKm();
 
-            double total = ratePerKm * req.getDistanceKm();
+            double total = ratePerKm * distanceKm;
 
             return new QuoteResponse(
                     v.getName(),
                     v.getCapacity(),
                     v.isAc(),
                     ratePerKm,
-                    req.getDistanceKm(),
+                    distanceKm,
                     total,
                     v.getImageUrl(),
                     v.getFeatures()
