@@ -1,8 +1,6 @@
 package com.example.Adiyogi_Travels.controller;
-
-import com.example.Adiyogi_Travels.model.Booking;
-
-
+import com.example.Adiyogi_Travels.dto.BookingRequest;
+import com.example.Adiyogi_Travels.dto.BookingResponse;
 import com.example.Adiyogi_Travels.model.Booking;
 import com.example.Adiyogi_Travels.repository.BookingRepository;
 import com.example.Adiyogi_Travels.service.GoogleMapsService;
@@ -21,6 +19,7 @@ public class BookingController {
     private BookingRepository bookingRepository;
     @Autowired
     private GoogleMapsService mapsService;
+
     @PostMapping
     public Map<String, Object> createBooking(@RequestBody Booking booking) {
         Booking savedBooking = bookingRepository.save(booking);
@@ -43,15 +42,37 @@ public class BookingController {
                 "fare", fare
         );
     }
+
     @PostMapping("/confirm")
-    public Booking confirmBooking(@RequestBody Map<String, Object> body) {
-        Booking booking = new Booking();
-        booking.setPickup((String) body.get("pickup"));
-        booking.setDropoff((String) body.get("dropoff"));
-        booking.setDistanceKm(((Number) body.get("distanceKm")).doubleValue());
-        booking.setFare(((Number) body.get("fare")).doubleValue());
-        booking.setStatus("CONFIRMED");
-        return bookingRepository.save(booking);
+    public BookingResponse confirmBooking(@RequestBody BookingRequest req) {
+
+
+                Booking booking = Booking.builder()
+                .pickup(req.getPickup())
+                .dropoff(req.getDropoff())
+                .tripType(req.getTripType())
+                .distanceKm(req.getDistanceKm())
+                .fare(req.getFare())
+                .pickupDate(java.time.LocalDate.parse(req.getPickupDate()))
+                .pickupTime(req.getPickupTime())
+                .mobileNo(req.getMobile())
+                .status("CONFIRMED")
+                .build();
+
+        Booking saved = bookingRepository.save(booking);
+
+        return new BookingResponse(
+                saved.getId(),
+                req.getVehicleName(),
+                saved.getPickup(),
+                saved.getDropoff(),
+                saved.getTripType(),
+                saved.getDistanceKm(),
+                saved.getFare(),
+                saved.getPickupDate().toString(),
+                saved.getPickupTime(),
+                saved.getMobileNo()
+        );
     }
 
 
