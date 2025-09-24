@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Data
@@ -25,14 +26,17 @@ public class Booking {
     private String pickupLocation;
 
     private LocalDate pickupDate;
-    private String pickupTime;
+    private LocalTime pickupTime;
 
     private String mobileNo;
+    private String vehicleName;
     private double distanceKm;
     private double fare;
-    private String status;
+    private String status="PENDING";
 
 
-    private String pickup;
-    private String dropoff;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

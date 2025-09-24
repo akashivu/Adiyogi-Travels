@@ -23,6 +23,8 @@ public class QuoteController {
         double distanceKm = googleMapsService.getDistance(req.getPickup(), req.getDropoff());
 
         var vehicles = vehicleRepository.findAll();
+        System.out.println("Vehicles fetched: " + vehicles.size());
+        System.out.println("Distance calculated: " + distanceKm);
         return vehicles.stream().map(v -> {
             double ratePerKm = "roundtrip".equalsIgnoreCase(req.getTripType())
                     ? v.getRoundTripRatePerKm()

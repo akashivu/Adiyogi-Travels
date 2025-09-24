@@ -4,11 +4,13 @@ import com.example.Adiyogi_Travels.dto.LoginRequest;
 import com.example.Adiyogi_Travels.dto.RegisterRequest;
 import com.example.Adiyogi_Travels.model.User;
 import com.example.Adiyogi_Travels.repository.UserRepository;
+import com.example.Adiyogi_Travels.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -19,6 +21,7 @@ public class AccountController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
 
     @PostMapping("/register")
@@ -45,7 +48,19 @@ public class AccountController {
         if (userOpt.isEmpty() || !passwordEncoder.matches(req.getPassword(), userOpt.get().getPassword())) {
             return ResponseEntity.status(401).body("Invalid email or password");
         }
+        User user = userOpt.get();
 
-        return ResponseEntity.ok("Login successful!");
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
+                .password(user.getPassword())
+                .authorities("USER")
+                .build();
+
+        String jwtToken = jwtService.generateToken(userDetails);
+
+
+        return ResponseEntity.ok(Map.of("token", jwtToken));
+
     }
 }
