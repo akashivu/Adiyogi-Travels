@@ -29,9 +29,15 @@ public class BookingController {
    @Autowired
    private UserRepository userRepository;
 
-    @GetMapping("/my-bookings/{userId}")
-    public List<BookingResponse> getMyBookings(@PathVariable Long userId) {
-        List<Booking> bookings = bookingRepository.findByUserId(userId);
+    @GetMapping("/my-bookings")
+    public List<BookingResponse> getMyBookings() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+
+        List<Booking> bookings = bookingRepository.findByUserId(user.getId());
 
         return bookings.stream()
                 .map(b -> new BookingResponse(
