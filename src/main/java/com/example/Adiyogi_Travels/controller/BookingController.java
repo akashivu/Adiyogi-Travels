@@ -5,7 +5,9 @@ import com.example.Adiyogi_Travels.model.Booking;
 import com.example.Adiyogi_Travels.model.User;
 import com.example.Adiyogi_Travels.repository.BookingRepository;
 import com.example.Adiyogi_Travels.repository.UserRepository;
+import com.example.Adiyogi_Travels.service.EmailService;
 import com.example.Adiyogi_Travels.service.GoogleMapsService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +30,11 @@ public class BookingController {
     private GoogleMapsService mapsService;
    @Autowired
    private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${app.admin.email:vijaytourstravels6158@gmail.com}")
+    private String adminEmail;
 
     @GetMapping("/my-bookings")
     public List<BookingResponse> getMyBookings() {
@@ -91,6 +98,28 @@ public class BookingController {
                         .build();
 
         Booking saved = bookingRepository.save(booking);
+
+
+        String userSubject = "Your booking is confirmed — " + saved.getVehicleName();
+        String userHtml = "<h3>Booking Confirmed </h3>"
+                + "<p>Vehicle: " + saved.getVehicleName() + "</p>"
+                + "<p>Pickup: " + saved.getFromLocation() + "</p>"
+                + "<p>Drop: " + saved.getToLocation() + "</p>"
+                + "<p>Pickup Date: " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
+                + "<p>Fare: ₹" + saved.getFare() + "</p>"
+                + "<hr><p>Thank you for choosing Vijay Travels!</p>";
+
+        String adminSubject = "New booking by " + user.getEmail() + " — " + saved.getVehicleName();
+        String adminHtml = "<h3>New Booking Alert</h3>"
+                + "<p>User: " + user.getEmail() + "</p>"
+                + "<p>Mobile: " + saved.getMobileNo() + "</p>"
+                + "<p>Vehicle: " + saved.getVehicleName() + "</p>"
+                + "<p>Pickup: " + saved.getFromLocation() + " — " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
+                + "<p>Drop: " + saved.getToLocation() + "</p>"
+                + "<p>Fare: ₹" + saved.getFare() + "</p>";
+
+        emailService.sendBookingNotifications(user.getEmail(), adminEmail, userSubject, userHtml, adminSubject, adminHtml);
+
 
         return new BookingResponse(
                 saved.getId(),
