@@ -16,32 +16,9 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 public class QuoteController {
     private final FareService fareService;
-    private final VehicleRepository vehicleRepository;
-    private final GoogleMapsService googleMapsService;
     @PostMapping("/quotes")
     public List<QuoteResponse> getQuotes(@RequestBody QuoteRequest req) {
-        double distanceKm = googleMapsService.getDistance(req.getPickup(), req.getDropoff());
 
-        var vehicles = vehicleRepository.findAll();
-        System.out.println("Vehicles fetched: " + vehicles.size());
-        System.out.println("Distance calculated: " + distanceKm);
-        return vehicles.stream().map(v -> {
-            double ratePerKm = "roundtrip".equalsIgnoreCase(req.getTripType())
-                    ? v.getRoundTripRatePerKm()
-                    : v.getOneWayRatePerKm();
-
-            double total = ratePerKm * distanceKm;
-
-            return new QuoteResponse(
-                    v.getName(),
-                    v.getCapacity(),
-                    v.isAc(),
-                    ratePerKm,
-                    distanceKm,
-                    total,
-                    v.getImageUrl(),
-                    v.getFeatures()
-            );
-        }).toList();
+        return fareService.search(req.getPickup(), req.getDropoff(), req.getTripType());
     }
 }

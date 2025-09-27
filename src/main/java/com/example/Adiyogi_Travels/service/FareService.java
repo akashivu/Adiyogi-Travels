@@ -1,40 +1,66 @@
 package com.example.Adiyogi_Travels.service;
 
 
+import com.example.Adiyogi_Travels.dto.QuoteResponse;
+import com.example.Adiyogi_Travels.model.Vehicle;
 import com.example.Adiyogi_Travels.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class FareService {
-    private final VehicleRepository vehicleRepo;
+    private final VehicleRepository vehicleRepository;
+    private final GoogleMapsService googleMapsService;
 
-    public Fare compute(Long vehicleId, double distanceKm, String tripType) {
-        var vehicle = vehicleRepo.findById(vehicleId)
-                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+    public List<QuoteResponse> search(String pickup, String drop, String tripType) {
+        int distance = googleMapsService.getDistance(pickup, drop);
+        List<Vehicle> vehicles = vehicleRepository.findAll();
 
-        double ratePerKm;
-
-        if ("roundtrip".equalsIgnoreCase(tripType)) {
-            ratePerKm = vehicle.getRoundTripRatePerKm();
-        } else {
-            ratePerKm = vehicle.getOneWayRatePerKm();
-        }
-
-
-        double total = ratePerKm * distanceKm;
-
-        return new Fare(vehicle.getName(), vehicle.getCapacity(), vehicle.isAc(), ratePerKm, distanceKm, total);
+        return vehicles.stream().map(v -> mapToFareResponse(v, distance)).toList();
     }
 
+    private QuoteResponse mapToFareResponse(Vehicle v, int distance) {
+        int includedKm = (v.getIncludedKm() == null || v.getIncludedKm() == 0)
+                ? distance
+                : v.getIncludedKm();
 
-    public static record Fare(
-            String vehicleName,
-            int capacity,
-            boolean ac,
-            double ratePerKm,
-            double distanceKm,
-            double total
-    ) {}
+        double baseFare = Math.min(distance, includedKm) * v.getPricePerKm();
+        double extraFare = distance > includedKm ? (distance - includedKm) * v.getExtraKmFare() : 0;
+        double gst = (baseFare + extraFare + v.getDriverAllowance()) * (v.getGstPercent() / 100);
+        double total = baseFare + extraFare + v.getDriverAllowance() + gst;
+
+        return QuoteResponse.builder()
+                .id(v.getId())
+                .vehicleName(v.getName())
+                .imageUrl(v.getImageUrl())
+                .capacity(v.getCapacity())
+                .bags(v.getBags())
+                .ac(v.isAc())
+                .includedKm(includedKm)
+                .pricePerKm(v.getPricePerKm())
+                .driverAllowance(v.getDriverAllowance())
+                .gstPercent(v.getGstPercent())
+                .distanceKm(distance)
+                .totalFare(total)
+                .inclusion(List.of(
+                        "Base fare for " + includedKm + " km",
+                        "Driver allowance ₹" + v.getDriverAllowance(),
+                        "GST (" + v.getGstPercent() + "%)"
+                ))
+                .exclusion(List.of(
+                        "₹" + v.getExtraKmFare() + "/km after " + includedKm + " km",
+                        "Parking, Toll, State Tax, Night charges if applicable"
+                ))
+                .fareBreakdown(new QuoteResponse.FareBreakdown(
+                        distance,
+                        v.getPricePerKm(),
+                        v.getDriverAllowance(),
+                        gst,
+                        total
+                ))
+                .build();
+    }
 }

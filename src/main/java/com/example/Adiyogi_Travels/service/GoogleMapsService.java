@@ -14,7 +14,7 @@ public class GoogleMapsService {
     @Value("${google.api.key}")
     private String apiKey;
 
-    public double getDistance(String pickup, String dropoff) {
+    public int getDistance(String pickup, String dropoff) {
         String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="
                 + pickup + "&destinations=" + dropoff + "&key=" + apiKey;
 
@@ -23,6 +23,6 @@ public class GoogleMapsService {
         Map elements = (Map) ((List) ((Map) rows.get(0)).get("elements")).get(0);
         Map distance = (Map) elements.get("distance");
 
-        return ((Number) distance.get("value")).doubleValue() / 1000.0;
+        return ((Number) distance.get("value")).intValue() / 1000;
     }
 }

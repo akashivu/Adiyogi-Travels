@@ -13,16 +13,18 @@ import lombok.*;
 @Builder
 public class Vehicle {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue
     private Long id;
 
     private String name;
+    private String imageUrl;
     private int capacity;
+    private int bags;
     private boolean ac;
 
-    private double oneWayRatePerKm;
-    private double roundTripRatePerKm;
-    private String imageUrl;
-    private String features;
+    private double pricePerKm;
+    private double driverAllowance;
+    private double gstPercent;
+    private double extraKmFare;
+    private Integer includedKm;
 }

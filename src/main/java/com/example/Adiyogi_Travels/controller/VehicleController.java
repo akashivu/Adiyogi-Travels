@@ -1,12 +1,11 @@
 package com.example.Adiyogi_Travels.controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.Adiyogi_Travels.dto.QuoteResponse;
+import com.example.Adiyogi_Travels.service.FareService;
+import org.springframework.web.bind.annotation.*;
 import com.example.Adiyogi_Travels.model.Vehicle;
 import com.example.Adiyogi_Travels.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
@@ -16,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VehicleController {
     private final VehicleRepository repo;
-
+    private final FareService fareService;
 
     @GetMapping
     public List<Vehicle> getAllVehicles() {
@@ -29,5 +28,12 @@ public class VehicleController {
         return repo.findByName(name)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+    @GetMapping("/search")
+    public List<QuoteResponse> searchRide(
+            @RequestParam String pickup,
+            @RequestParam String drop,
+            @RequestParam(defaultValue = "oneway") String tripType) {
+        return fareService.search(pickup, drop, tripType);
     }
 }
