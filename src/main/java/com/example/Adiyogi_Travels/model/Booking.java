@@ -16,7 +16,8 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private String customerName;
+    private String customerEmail;
     private String tripCategory;
     private String tripType;
 
@@ -34,9 +35,9 @@ public class Booking {
     private double fare;
     private String status="PENDING";
 
-
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+
 }

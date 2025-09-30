@@ -76,50 +76,49 @@ public class BookingController {
 
     @PostMapping("/confirm")
     public BookingResponse confirmBooking(@RequestBody BookingRequest req) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-                Booking booking = Booking.builder()
-                        .tripCategory(req.getTripCategory())
-                        .tripType(req.getTripType())
-                        .fromLocation(req.getFromLocation())
-                        .toLocation(req.getToLocation())
-                        .city(req.getCity())
-                        .pickupLocation(req.getPickupLocation())
-                        .pickupDate(LocalDate.parse(req.getPickupDate()))
-                        .pickupTime(LocalTime.parse(req.getPickupTime()))
-                        .mobileNo(req.getMobile())
-                        .vehicleName(req.getVehicleName())
-                        .distanceKm(req.getDistanceKm())
-                        .fare(req.getFare())
-                        .status("CONFIRMED")
-                        .user(user)
-                        .build();
+
+        Booking booking = Booking.builder()
+                .tripCategory(req.getTripCategory())
+                .tripType(req.getTripType())
+                .fromLocation(req.getFromLocation())
+                .toLocation(req.getToLocation())
+                .city(req.getCity())
+                .pickupLocation(req.getPickupLocation())
+                .pickupDate(LocalDate.parse(req.getPickupDate()))
+                .pickupTime(LocalTime.parse(req.getPickupTime()))
+                .mobileNo(req.getMobile())
+                .vehicleName(req.getVehicleName())
+                .distanceKm(req.getDistanceKm())
+                .fare(req.getFare())
+                .status("CONFIRMED")
+                .customerName(req.getName())
+                .customerEmail(req.getEmail())
+                .build();
 
         Booking saved = bookingRepository.save(booking);
 
 
         String userSubject = "Your booking is confirmed — " + saved.getVehicleName();
         String userHtml = "<h3>Booking Confirmed </h3>"
-                + "<p>Vehicle: " + saved.getVehicleName() + "</p>"
-                + "<p>Pickup: " + saved.getFromLocation() + "</p>"
-                + "<p>Drop: " + saved.getToLocation() + "</p>"
-                + "<p>Pickup Date: " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
-                + "<p>Fare: ₹" + saved.getFare() + "</p>"
+                + "<p><b>Name:</b> " + req.getName() + "</p>"
+                + "<p><b>Vehicle:</b> " + saved.getVehicleName() + "</p>"
+                + "<p><b>Pickup:</b> " + saved.getFromLocation() + "</p>"
+                + "<p><b>Drop:</b> " + saved.getToLocation() + "</p>"
+                + "<p><b>Pickup Date:</b> " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
+                + "<p><b>Fare:</b> ₹" + saved.getFare() + "</p>"
                 + "<hr><p>Thank you for choosing Vijay Travels!</p>";
 
-        String adminSubject = "New booking by " + user.getEmail() + " — " + saved.getVehicleName();
+        String adminSubject = "New booking — " + saved.getVehicleName();
         String adminHtml = "<h3>New Booking Alert</h3>"
-                + "<p>User: " + user.getEmail() + "</p>"
-                + "<p>Mobile: " + saved.getMobileNo() + "</p>"
-                + "<p>Vehicle: " + saved.getVehicleName() + "</p>"
-                + "<p>Pickup: " + saved.getFromLocation() + " — " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
-                + "<p>Drop: " + saved.getToLocation() + "</p>"
-                + "<p>Fare: ₹" + saved.getFare() + "</p>";
+                + "<p><b>Name:</b> " + req.getName() + "</p>"
+                + "<p><b>Email:</b> " + req.getEmail() + "</p>"
+                + "<p><b>Mobile:</b> " + saved.getMobileNo() + "</p>"
+                + "<p><b>Vehicle:</b> " + saved.getVehicleName() + "</p>"
+                + "<p><b>Pickup:</b> " + saved.getFromLocation() + " — " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
+                + "<p><b>Drop:</b> " + saved.getToLocation() + "</p>"
+                + "<p><b>Fare:</b> ₹" + saved.getFare() + "</p>";
 
-        emailService.sendBookingNotifications(user.getEmail(), adminEmail, userSubject, userHtml, adminSubject, adminHtml);
-
+        emailService.sendBookingNotifications(req.getEmail(), adminEmail, userSubject, userHtml, adminSubject, adminHtml);
 
         return new BookingResponse(
                 saved.getId(),
@@ -134,6 +133,7 @@ public class BookingController {
                 saved.getMobileNo()
         );
     }
+
 
 
 }

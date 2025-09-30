@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BookingRequest {
+    private String name;
+    private String email;
     private String tripCategory;
     private String tripType;
 

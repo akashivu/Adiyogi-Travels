@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/account/**").permitAll()
                         .requestMatchers("/api/quotes/**").permitAll()
                         .requestMatchers("/api/quotes").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/quotes", "/api/bookings/confirm").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/api/bookings/my-bookings").authenticated()
                         .requestMatchers("/api/bookings/confirm").authenticated()
