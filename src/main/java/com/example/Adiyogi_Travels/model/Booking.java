@@ -33,7 +33,8 @@ public class Booking {
     private String vehicleName;
     private double distanceKm;
     private double fare;
-    private String status="PENDING";
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status = BookingStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

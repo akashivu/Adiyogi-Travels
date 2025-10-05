@@ -4,6 +4,7 @@ import com.example.Adiyogi_Travels.security.CustomUserDetailsService;
 import com.example.Adiyogi_Travels.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,12 +33,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/account/**").permitAll()
                         .requestMatchers("/api/quotes/**").permitAll()
                         .requestMatchers("/api/quotes").permitAll()
                         .requestMatchers("/api/auth/**", "/api/quotes", "/api/bookings/confirm").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/api/send-email").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/bookings/*/cancel").permitAll()
                         .requestMatchers("/api/bookings/my-bookings").authenticated()
                         .requestMatchers("/api/bookings/confirm").authenticated()
                         .anyRequest().authenticated()
@@ -56,9 +59,10 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "https://vijaytravels.netlify.app"
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "https://adiyogicabz.com",
+                "https://www.adiyogicabz.com"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

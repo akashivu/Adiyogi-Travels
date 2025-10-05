@@ -1,6 +1,7 @@
 package com.example.Adiyogi_Travels.controller;
 
 import com.example.Adiyogi_Travels.model.Booking;
+import com.example.Adiyogi_Travels.model.BookingStatus;
 import com.example.Adiyogi_Travels.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class AdminController {
     @PatchMapping("/bookings/{id}/status")
     public Booking updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
         Booking booking = repo.findById(id).orElseThrow(() -> new RuntimeException("Booking not found"));
-        booking.setStatus(body.get("status"));
+        booking.setStatus(BookingStatus.CONFIRMED);
         return repo.save(booking);
     }
 
