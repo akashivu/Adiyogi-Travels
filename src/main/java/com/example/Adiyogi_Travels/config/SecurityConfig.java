@@ -62,7 +62,8 @@ public class SecurityConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
                 "https://adiyogicabz.com",
-                "https://www.adiyogicabz.com"
+                "https://www.adiyogicabz.com",
+                "https://vijaytravels.netlify.app"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
