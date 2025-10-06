@@ -8,7 +8,6 @@ import com.example.Adiyogi_Travels.repository.BookingRepository;
 import com.example.Adiyogi_Travels.repository.UserRepository;
 import com.example.Adiyogi_Travels.service.EmailService;
 import com.example.Adiyogi_Travels.service.GoogleMapsService;
-import com.example.Adiyogi_Travels.service.NotificationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,13 +32,11 @@ public class BookingController {
    private UserRepository userRepository;
     @Autowired
     private EmailService emailService;
-    @Autowired
-    private NotificationService notificationService;
+
 
     @Value("${app.admin.email:vijaytourstravels6158@gmail.com}")
     private String adminEmail;
-    @Value("${admin.phone}")
-    private String adminPhone;
+
 
     @GetMapping("/my-bookings")
     public List<BookingResponse> getMyBookings() {
@@ -125,26 +121,8 @@ public class BookingController {
                 + "<p><b>Fare:</b> ₹" + saved.getFare() + "</p>";
 
         emailService.sendBookingNotifications(req.getEmail(), adminEmail, userSubject, userHtml, adminSubject, adminHtml);
-        String userMsg = "Hi " + saved.getCustomerName() + ", your booking #" + saved.getId() +
-                " is confirmed \nPickup: " + saved.getPickupDate() + " " + saved.getPickupTime() +
-                " from " + saved.getFromLocation() + " to " + saved.getToLocation() +
-                ". Fare: ₹" + saved.getFare() + ". Thank you for choosing Vijay Travels!";
-
-        String adminMsg = " New Booking Alert\n" +
-                "Name: " + saved.getCustomerName() + "\n" +
-                "Mobile: " + saved.getMobileNo() + "\n" +
-                "Vehicle: " + saved.getVehicleName() + "\n" +
-                "Pickup: " + saved.getFromLocation() + " — " + saved.getPickupDate() + " " + saved.getPickupTime() + "\n" +
-                "Drop: " + saved.getToLocation() + "\nFare: ₹" + saved.getFare();
 
 
-        notificationService.sendSms(saved.getMobileNo(), userMsg);
-        notificationService.sendWhatsapp(saved.getMobileNo(), userMsg);
-
-        // Send to admin (replace with your admin phone in E.164 format)
-        String adminPhone = "+91XXXXXXXXXX"; // <-- put your admin's number here
-        notificationService.sendSms(adminPhone, adminMsg);
-        notificationService.sendWhatsapp(adminPhone, adminMsg);
 
         return new BookingResponse(
                 saved.getId(),
@@ -169,29 +147,38 @@ public class BookingController {
             return Map.of("message", "Booking is already cancelled");
         }
 
-        booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
 
-        // ---- Notify User ----
-        String userMsg = "Hi " + booking.getCustomerName() +
-                ", your booking #" + booking.getId() + " has been CANCELLED.\n" +
-                "Pickup was: " + booking.getPickupDate() + " " + booking.getPickupTime() +
-                " from " + booking.getFromLocation() + " to " + booking.getToLocation() +
-                ". We hope to serve you next time — Vijay Travels.";
+        String userSubject = "Your booking #" + booking.getId() + " has been cancelled";
+        String userHtml = "<h3>Booking Cancelled</h3>"
+                + "<p>Hi " + booking.getCustomerName() + ",</p>"
+                + "<p>Your booking has been cancelled successfully.</p>"
+                + "<p><b>Pickup:</b> " + booking.getFromLocation() + " → " + booking.getToLocation() + "</p>"
+                + "<p><b>Scheduled Date:</b> " + booking.getPickupDate() + " " + booking.getPickupTime() + "</p>"
+                + "<p>We hope to serve you next time — Vijay Travels.</p>";
 
-        notificationService.sendSms(booking.getMobileNo(), userMsg);
-        notificationService.sendWhatsapp(booking.getMobileNo(), userMsg);
+        String adminSubject = "Booking Cancelled — #" + booking.getId();
+        String adminHtml = "<h3>Booking Cancelled</h3>"
+                + "<p><b>Name:</b> " + booking.getCustomerName() + "</p>"
+                + "<p><b>Email:</b> " + booking.getCustomerEmail() + "</p>"
+                + "<p><b>Mobile:</b> " + booking.getMobileNo() + "</p>"
+                + "<p><b>Vehicle:</b> " + booking.getVehicleName() + "</p>"
+                + "<p><b>Pickup:</b> " + booking.getFromLocation() + " → " + booking.getToLocation() + "</p>"
+                + "<p><b>Date:</b> " + booking.getPickupDate() + " " + booking.getPickupTime() + "</p>";
 
-        // ---- Notify Admin ----
-        String adminMsg = "Booking #" + booking.getId() + " CANCELLED by customer.\n" +
-                "Name: " + booking.getCustomerName() + "\n" +
-                "Mobile: " + booking.getMobileNo() + "\n" +
-                "Vehicle: " + booking.getVehicleName() + "\n" +
-                "Pickup: " + booking.getFromLocation() + " — " + booking.getPickupDate() + " " + booking.getPickupTime() + "\n" +
-                "Drop: " + booking.getToLocation() + "\nFare: ₹" + booking.getFare();
+        emailService.sendBookingNotifications(
+                booking.getCustomerEmail(),
+                adminEmail,
+                userSubject,
+                userHtml,
+                adminSubject,
+                adminHtml
+        );
 
-        notificationService.sendSms(adminPhone, adminMsg);
-        notificationService.sendWhatsapp(adminPhone, adminMsg);
+
+
+
 
         return Map.of("message", "Booking cancelled successfully");
     }
