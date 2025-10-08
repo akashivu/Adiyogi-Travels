@@ -1,13 +1,8 @@
 package com.example.Adiyogi_Travels.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.Adiyogi_Travels.service.EmailService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -15,26 +10,34 @@ import java.util.Map;
 @RequestMapping("/api")
 public class MailController {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final EmailService emailService;
+
+    public MailController(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
     @PostMapping("/send-email")
     public ResponseEntity<String> sendEmail(@RequestBody Map<String, String> data) {
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(data.get("email"));
-            message.setTo("vijaytourstravels6158@gmail.com");
-            message.setSubject("New message from " + data.get("name"));
-            message.setText(
-                    "Name: " + data.get("name") + "\n" +
-                            "Email: " + data.get("email") + "\n" +
-                            "Phone: " + data.getOrDefault("phone", "N/A") + "\n\n" +
-                            data.get("message")
-            );
-            mailSender.send(message);
-            return ResponseEntity.ok("Email sent");
+            String fromName = data.getOrDefault("name", "Unknown");
+            String fromEmail = data.getOrDefault("email", "no-reply@adiyogi-travels.com");
+            String phone = data.getOrDefault("phone", "N/A");
+            String messageText = data.getOrDefault("message", "");
+
+            String subject = "New message from " + fromName;
+            String htmlBody = "<h3>Contact Form Submission</h3>"
+                    + "<p><b>Name:</b> " + fromName + "</p>"
+                    + "<p><b>Email:</b> " + fromEmail + "</p>"
+                    + "<p><b>Phone:</b> " + phone + "</p>"
+                    + "<p><b>Message:</b><br>" + messageText + "</p>";
+
+            
+            emailService.sendHtmlEmail("vijaytourstravels6158@gmail.com", subject, htmlBody);
+
+            return ResponseEntity.ok("Email sent successfully!");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Failed to send email");
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to send email: " + e.getMessage());
         }
     }
 }
