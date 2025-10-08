@@ -1,55 +1,59 @@
 package com.example.Adiyogi_Travels.service;
 
-import jakarta.mail.internet.MimeMessage;
+import com.sendgrid.*;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
-
-    @Value("${spring.mail.username}")
-    private String fromEmail;
-
     @Value("${app.admin.email:}")
     private String adminEmail;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    @Value("${SENDGRID_API_KEY}")
+    private String sendGridApiKey;
+
+    @Value("${spring.mail.username:no-reply@adiyogi-travels.com}")
+    private String fromEmail;
+
+    private SendGrid buildClient() {
+        return new SendGrid(sendGridApiKey);
     }
 
-
+    @Async
     public void sendPlainText(String to, String subject, String body) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setFrom(fromEmail);
-        msg.setTo(to);
-        msg.setSubject(subject);
-        msg.setText(body);
-        mailSender.send(msg);
+        sendEmail(to, subject, body, "text/plain");
     }
-
 
     @Async
     public void sendHtmlEmail(String to, String subject, String htmlBody) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlBody, true);
-            mailSender.send(message);
-        } catch (Exception ex) {
+        sendEmail(to, subject, htmlBody, "text/html");
+    }
 
+    private void sendEmail(String to, String subject, String contentValue, String type) {
+        Email from = new Email(fromEmail);
+        Email recipient = new Email(to);
+        Content content = new Content(type, contentValue);
+        Mail mail = new Mail(from, subject, recipient, content);
+
+        SendGrid sg = buildClient();
+        Request request = new Request();
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            System.out.println("SendGrid response: " + response.getStatusCode());
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
-
 
     public void sendBookingNotifications(String userEmail, String adminEmailOverride,
                                          String subjectUser, String htmlUser,
@@ -57,13 +61,12 @@ public class EmailService {
 
         sendHtmlEmail(userEmail, subjectUser, htmlUser);
 
-
         String admin = (adminEmailOverride != null && !adminEmailOverride.isBlank()) ? adminEmailOverride : adminEmail;
         if (admin != null && !admin.isBlank()) {
             sendHtmlEmail(admin, subjectAdmin, htmlAdmin);
         } else {
-
             sendHtmlEmail(fromEmail, subjectAdmin, htmlAdmin);
         }
     }
 }
+
