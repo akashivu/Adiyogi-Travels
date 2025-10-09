@@ -31,7 +31,7 @@ public class MailController {
                     + "<p><b>Phone:</b> " + phone + "</p>"
                     + "<p><b>Message:</b><br>" + messageText + "</p>";
 
-            
+
             emailService.sendHtmlEmail("vijaytourstravels6158@gmail.com", subject, htmlBody);
 
             return ResponseEntity.ok("Email sent successfully!");
