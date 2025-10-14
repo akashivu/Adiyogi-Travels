@@ -8,9 +8,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class BookingRequest {
+
     private String name;
     private String email;
+
     private String tripCategory;
     private String tripType;
 
@@ -27,6 +30,5 @@ public class BookingRequest {
 
     private double distanceKm;
     private double fare;
-
-
 }
+

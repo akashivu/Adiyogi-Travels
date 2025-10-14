@@ -9,25 +9,22 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class QuoteResponse {
+
     private long id;
     private String vehicleName;
+    private String imageUrl;
     private int capacity;
+    private int bags;
     private boolean ac;
+
     private double pricePerKm;
     private double distanceKm;
-    private double totalFare;
-    private String imageUrl;
-
-
-
-
-    private int bags;
     private double driverAllowance;
     private double gstPercent;
-    private double extraKmFare;
-    private int includedKm;
+    private double totalFare;
 
     private List<String> inclusion;
     private List<String> exclusion;

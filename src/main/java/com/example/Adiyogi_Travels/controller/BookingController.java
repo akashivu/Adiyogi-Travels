@@ -66,7 +66,6 @@ public class BookingController {
                 .toList();
     }
 
-
     @PostMapping("/estimate")
     public Map<String, Object> estimateFare(@RequestBody Map<String, Object> body) {
         String pickup = (String) body.get("pickup");
@@ -77,17 +76,19 @@ public class BookingController {
         Double dropLat = body.get("dropLat") != null ? ((Number) body.get("dropLat")).doubleValue() : null;
         Double dropLng = body.get("dropLng") != null ? ((Number) body.get("dropLng")).doubleValue() : null;
 
-
         int distance = mapsService.getDistance(pickup, dropoff, pickupLat, pickupLng, dropLat, dropLng);
 
         double fare;
-        if (pickup.toLowerCase().contains("airport") || dropoff.toLowerCase().contains("airport")) {
+        boolean isAirportTrip = (pickup != null && pickup.toLowerCase().contains("airport")) ||
+                (dropoff != null && dropoff.toLowerCase().contains("airport"));
+
+        if (isAirportTrip) {
             fare = distance * 26;
         } else {
-            fare = distance * 20;
+            int chargedKm = Math.max(distance, 130);
+            fare = chargedKm * 20;
         }
 
-        System.out.println(" Estimated distance: " + distance + " km");
         return Map.of("distanceKm", distance, "fare", fare);
     }
 
@@ -112,7 +113,6 @@ public class BookingController {
                 .build();
 
         Booking saved = bookingRepository.save(booking);
-
 
         String userSubject = "Your booking is confirmed — " + saved.getVehicleName();
         String userHtml = "<h3>Booking Confirmed</h3>"

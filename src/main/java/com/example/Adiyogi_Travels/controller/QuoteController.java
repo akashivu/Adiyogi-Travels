@@ -1,10 +1,7 @@
 package com.example.Adiyogi_Travels.controller;
 
-import com.example.Adiyogi_Travels.dto.QuoteRequest;
 import com.example.Adiyogi_Travels.dto.QuoteResponse;
-import com.example.Adiyogi_Travels.repository.VehicleRepository;
 import com.example.Adiyogi_Travels.service.FareService;
-import com.example.Adiyogi_Travels.service.GoogleMapsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,12 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/quotes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class QuoteController {
+
     private final FareService fareService;
-    @PostMapping("/api/quotes")
+
+    @PostMapping
     public List<QuoteResponse> getQuotes(@RequestBody Map<String, Object> body) {
         String pickup = (String) body.get("pickup");
         String dropoff = (String) body.get("dropoff");
@@ -30,5 +29,5 @@ public class QuoteController {
 
         return fareService.search(pickup, dropoff, tripType, pickupLat, pickupLng, dropLat, dropLng);
     }
-
 }
+

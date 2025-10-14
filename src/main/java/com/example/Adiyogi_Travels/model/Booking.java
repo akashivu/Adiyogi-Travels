@@ -2,11 +2,11 @@ package com.example.Adiyogi_Travels.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
+@Table(name = "bookings")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,8 +16,10 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String customerName;
     private String customerEmail;
+
     private String tripCategory;
     private String tripType;
 
@@ -31,14 +33,15 @@ public class Booking {
 
     private String mobileNo;
     private String vehicleName;
+
     private double distanceKm;
     private double fare;
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private BookingStatus status = BookingStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-
 }
