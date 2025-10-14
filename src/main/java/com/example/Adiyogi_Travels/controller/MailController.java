@@ -40,4 +40,5 @@ public class MailController {
             return ResponseEntity.status(500).body("Failed to send email: " + e.getMessage());
         }
     }
+
 }

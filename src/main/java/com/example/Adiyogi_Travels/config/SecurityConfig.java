@@ -35,8 +35,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/account/**").permitAll()
-                        .requestMatchers("/api/quotes/**").permitAll()
-                        .requestMatchers("/api/quotes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/quotes/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/quotes").permitAll()
+
                         .requestMatchers("/api/auth/**", "/api/quotes", "/api/bookings/confirm").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/api/send-email").permitAll()

@@ -1,4 +1,5 @@
 package com.example.Adiyogi_Travels.controller;
+
 import com.example.Adiyogi_Travels.dto.BookingRequest;
 import com.example.Adiyogi_Travels.dto.BookingResponse;
 import com.example.Adiyogi_Travels.model.Booking;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -26,17 +26,18 @@ public class BookingController {
 
     @Autowired
     private BookingRepository bookingRepository;
+
     @Autowired
     private GoogleMapsService mapsService;
-   @Autowired
-   private UserRepository userRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Autowired
     private EmailService emailService;
 
-
     @Value("${app.admin.email:vijaytourstravels6158@gmail.com}")
     private String adminEmail;
-
 
     @GetMapping("/my-bookings")
     public List<BookingResponse> getMyBookings() {
@@ -67,18 +68,21 @@ public class BookingController {
     @PostMapping("/estimate")
     public Map<String, Object> estimateFare(@RequestBody Map<String, String> body) {
         double distance = mapsService.getDistance(body.get("pickup"), body.get("dropoff"));
-        double fare = distance * 20;
+        double fare;
 
-        return Map.of(
-                "distanceKm", distance,
-                "fare", fare
-        );
+
+        if (body.get("pickup").toLowerCase().contains("airport") ||
+                body.get("dropoff").toLowerCase().contains("airport")) {
+            fare = distance * 26;
+        } else {
+            fare = distance * 20;
+        }
+
+        return Map.of("distanceKm", distance, "fare", fare);
     }
-
 
     @PostMapping("/confirm")
     public BookingResponse confirmBooking(@RequestBody BookingRequest req) {
-
         Booking booking = Booking.builder()
                 .tripCategory(req.getTripCategory())
                 .tripType(req.getTripType())
@@ -99,30 +103,25 @@ public class BookingController {
 
         Booking saved = bookingRepository.save(booking);
 
-
+        // Send confirmation emails
         String userSubject = "Your booking is confirmed — " + saved.getVehicleName();
-        String userHtml = "<h3>Booking Confirmed </h3>"
+        String userHtml = "<h3>Booking Confirmed</h3>"
                 + "<p><b>Name:</b> " + req.getName() + "</p>"
-                + "<p><b>Vehicle:</b> " + saved.getVehicleName() + "</p>"
                 + "<p><b>Pickup:</b> " + saved.getFromLocation() + "</p>"
                 + "<p><b>Drop:</b> " + saved.getToLocation() + "</p>"
-                + "<p><b>Pickup Date:</b> " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
                 + "<p><b>Fare:</b> ₹" + saved.getFare() + "</p>"
+                + "<p><b>Pickup Date:</b> " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
                 + "<hr><p>Thank you for choosing Vijay Travels!</p>";
 
-        String adminSubject = "New booking — " + saved.getVehicleName();
+        String adminSubject = "New Booking — " + saved.getVehicleName();
         String adminHtml = "<h3>New Booking Alert</h3>"
                 + "<p><b>Name:</b> " + req.getName() + "</p>"
                 + "<p><b>Email:</b> " + req.getEmail() + "</p>"
-                + "<p><b>Mobile:</b> " + saved.getMobileNo() + "</p>"
-                + "<p><b>Vehicle:</b> " + saved.getVehicleName() + "</p>"
-                + "<p><b>Pickup:</b> " + saved.getFromLocation() + " — " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
+                + "<p><b>Pickup:</b> " + saved.getFromLocation() + "</p>"
                 + "<p><b>Drop:</b> " + saved.getToLocation() + "</p>"
                 + "<p><b>Fare:</b> ₹" + saved.getFare() + "</p>";
 
         emailService.sendBookingNotifications(req.getEmail(), adminEmail, userSubject, userHtml, adminSubject, adminHtml);
-
-
 
         return new BookingResponse(
                 saved.getId(),
@@ -136,54 +135,5 @@ public class BookingController {
                 saved.getPickupTime().toString(),
                 saved.getMobileNo()
         );
-
     }
-    @PutMapping("/{id}/cancel")
-    public Map<String, String> cancelBooking(@PathVariable Long id) {
-        Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-
-        if ("CANCELLED".equalsIgnoreCase(String.valueOf(booking.getStatus()))) {
-            return Map.of("message", "Booking is already cancelled");
-        }
-
-        booking.setStatus(BookingStatus.CANCELLED);
-        bookingRepository.save(booking);
-
-        String userSubject = "Your booking #" + booking.getId() + " has been cancelled";
-        String userHtml = "<h3>Booking Cancelled</h3>"
-                + "<p>Hi " + booking.getCustomerName() + ",</p>"
-                + "<p>Your booking has been cancelled successfully.</p>"
-                + "<p><b>Pickup:</b> " + booking.getFromLocation() + " → " + booking.getToLocation() + "</p>"
-                + "<p><b>Scheduled Date:</b> " + booking.getPickupDate() + " " + booking.getPickupTime() + "</p>"
-                + "<p>We hope to serve you next time — Vijay Travels.</p>";
-
-        String adminSubject = "Booking Cancelled — #" + booking.getId();
-        String adminHtml = "<h3>Booking Cancelled</h3>"
-                + "<p><b>Name:</b> " + booking.getCustomerName() + "</p>"
-                + "<p><b>Email:</b> " + booking.getCustomerEmail() + "</p>"
-                + "<p><b>Mobile:</b> " + booking.getMobileNo() + "</p>"
-                + "<p><b>Vehicle:</b> " + booking.getVehicleName() + "</p>"
-                + "<p><b>Pickup:</b> " + booking.getFromLocation() + " → " + booking.getToLocation() + "</p>"
-                + "<p><b>Date:</b> " + booking.getPickupDate() + " " + booking.getPickupTime() + "</p>";
-
-        emailService.sendBookingNotifications(
-                booking.getCustomerEmail(),
-                adminEmail,
-                userSubject,
-                userHtml,
-                adminSubject,
-                adminHtml
-        );
-
-
-
-
-
-        return Map.of("message", "Booking cancelled successfully");
-    }
-
-
-
-
 }
