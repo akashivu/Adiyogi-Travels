@@ -33,7 +33,7 @@ public class VehicleController {
         System.out.println("Pickup Coords: " + pickupLat + "," + pickupLng);
         System.out.println("Drop Coords: " + dropLat + "," + dropLng);
 
-       
+
         return fareService.search(pickup, dropoff, tripType, pickupLat, pickupLng, dropLat, dropLng);
     }
 }
