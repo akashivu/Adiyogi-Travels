@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/quotes")
+@RequestMapping("/api/vehicles")
 @CrossOrigin(origins = {"http://localhost:5173", "https://adiyogi-travels.onrender.com"})
 public class VehicleController {
 

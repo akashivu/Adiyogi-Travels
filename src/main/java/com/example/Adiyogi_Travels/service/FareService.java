@@ -93,7 +93,7 @@ public class FareService {
 
         } else {
 
-            chargedKm = Math.max(distance, MIN_OUTSTATION_KM); 
+            chargedKm = Math.max(distance, MIN_OUTSTATION_KM);
             baseFare = chargedKm * v.getPricePerKm();
             gst = (baseFare + v.getDriverAllowance()) * (v.getGstPercent() / 100);
             total = baseFare + v.getDriverAllowance() + gst;
