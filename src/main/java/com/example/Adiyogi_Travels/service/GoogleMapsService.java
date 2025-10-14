@@ -17,62 +17,50 @@ public class GoogleMapsService {
     @Value("${google.api.key}")
     private String apiKey;
 
-    public int getDistance(String pickup, String dropoff) {
+
+    public int getDistance(String pickup, String dropoff,
+                           Double pickupLat, Double pickupLng,
+                           Double dropLat, Double dropLng) {
         try {
-            if (pickup == null || dropoff == null || pickup.isBlank() || dropoff.isBlank()) {
-                System.err.println("⚠️ Invalid pickup/drop: pickup=" + pickup + ", dropoff=" + dropoff);
-                return 0;
+            String origins;
+            String destinations;
+
+
+            if (pickupLat != null && pickupLng != null && dropLat != null && dropLng != null) {
+                origins = pickupLat + "," + pickupLng;
+                destinations = dropLat + "," + dropLng;
+            } else {
+                if (pickup == null || dropoff == null || pickup.isBlank() || dropoff.isBlank()) {
+                    System.err.println("Invalid pickup/drop: pickup=" + pickup + ", dropoff=" + dropoff);
+                    return 0;
+                }
+
+                origins = URLEncoder.encode(pickup, StandardCharsets.UTF_8);
+                destinations = URLEncoder.encode(dropoff, StandardCharsets.UTF_8);
             }
-
-           
-            boolean isPickupCoords = pickup.matches(".*\\d{1,2}\\.\\d+.*,.*\\d{1,2}\\.\\d+.*");
-            boolean isDropCoords = dropoff.matches(".*\\d{1,2}\\.\\d+.*,.*\\d{1,2}\\.\\d+.*");
-
-            String origins = isPickupCoords
-                    ? pickup
-                    : URLEncoder.encode(pickup, StandardCharsets.UTF_8);
-
-            String destinations = isDropCoords
-                    ? dropoff
-                    : URLEncoder.encode(dropoff, StandardCharsets.UTF_8);
-
 
             String url = String.format(
                     "https://maps.googleapis.com/maps/api/distancematrix/json?origins=%s&destinations=%s&key=%s",
-                    origins,
-                    destinations,
-                    apiKey
+                    origins, destinations, apiKey
             );
 
             Map response = restTemplate.getForObject(url, Map.class);
             if (response == null) {
-                System.err.println("Google API returned null response");
-                return 0;
-            }
-
-            Object status = response.get("status");
-            if (status == null || !"OK".equals(status.toString())) {
-                System.err.println("Google API status not OK: " + status);
+                System.err.println(" Google API returned null response");
                 return 0;
             }
 
             List rows = (List) response.get("rows");
-            if (rows == null || rows.isEmpty()) {
-                System.err.println("No rows found in Google API response");
-                return 0;
-            }
+            if (rows == null || rows.isEmpty()) return 0;
 
             Map firstRow = (Map) rows.get(0);
             List elements = (List) firstRow.get("elements");
-            if (elements == null || elements.isEmpty()) {
-                System.err.println("No elements found in Google API response");
-                return 0;
-            }
+            if (elements == null || elements.isEmpty()) return 0;
 
             Map firstElement = (Map) elements.get(0);
             String elementStatus = (String) firstElement.get("status");
             if (!"OK".equals(elementStatus)) {
-                System.err.println("Element status not OK: " + elementStatus);
+                System.err.println(" Element status not OK: " + elementStatus);
                 return 0;
             }
 
@@ -85,7 +73,7 @@ public class GoogleMapsService {
             int meters = ((Number) distance.get("value")).intValue();
             int km = (int) Math.ceil(meters / 1000.0);
 
-            System.out.println("Distance calculated: " + km + " km (" + pickup + " → " + dropoff + ")");
+            System.out.println("Distance calculated: " + km + " km (" + origins + " → " + destinations + ")");
             return km;
 
         } catch (Exception e) {
@@ -95,4 +83,5 @@ public class GoogleMapsService {
         }
     }
 }
+
 

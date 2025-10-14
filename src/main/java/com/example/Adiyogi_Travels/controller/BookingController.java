@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -65,19 +66,28 @@ public class BookingController {
                 .toList();
     }
 
+
     @PostMapping("/estimate")
-    public Map<String, Object> estimateFare(@RequestBody Map<String, String> body) {
-        double distance = mapsService.getDistance(body.get("pickup"), body.get("dropoff"));
+    public Map<String, Object> estimateFare(@RequestBody Map<String, Object> body) {
+        String pickup = (String) body.get("pickup");
+        String dropoff = (String) body.get("dropoff");
+
+        Double pickupLat = body.get("pickupLat") != null ? ((Number) body.get("pickupLat")).doubleValue() : null;
+        Double pickupLng = body.get("pickupLng") != null ? ((Number) body.get("pickupLng")).doubleValue() : null;
+        Double dropLat = body.get("dropLat") != null ? ((Number) body.get("dropLat")).doubleValue() : null;
+        Double dropLng = body.get("dropLng") != null ? ((Number) body.get("dropLng")).doubleValue() : null;
+
+
+        int distance = mapsService.getDistance(pickup, dropoff, pickupLat, pickupLng, dropLat, dropLng);
+
         double fare;
-
-
-        if (body.get("pickup").toLowerCase().contains("airport") ||
-                body.get("dropoff").toLowerCase().contains("airport")) {
+        if (pickup.toLowerCase().contains("airport") || dropoff.toLowerCase().contains("airport")) {
             fare = distance * 26;
         } else {
             fare = distance * 20;
         }
 
+        System.out.println(" Estimated distance: " + distance + " km");
         return Map.of("distanceKm", distance, "fare", fare);
     }
 
@@ -103,7 +113,7 @@ public class BookingController {
 
         Booking saved = bookingRepository.save(booking);
 
-        // Send confirmation emails
+
         String userSubject = "Your booking is confirmed — " + saved.getVehicleName();
         String userHtml = "<h3>Booking Confirmed</h3>"
                 + "<p><b>Name:</b> " + req.getName() + "</p>"
@@ -121,7 +131,14 @@ public class BookingController {
                 + "<p><b>Drop:</b> " + saved.getToLocation() + "</p>"
                 + "<p><b>Fare:</b> ₹" + saved.getFare() + "</p>";
 
-        emailService.sendBookingNotifications(req.getEmail(), adminEmail, userSubject, userHtml, adminSubject, adminHtml);
+        emailService.sendBookingNotifications(
+                req.getEmail(),
+                adminEmail,
+                userSubject,
+                userHtml,
+                adminSubject,
+                adminHtml
+        );
 
         return new BookingResponse(
                 saved.getId(),
@@ -137,3 +154,4 @@ public class BookingController {
         );
     }
 }
+

@@ -15,8 +15,10 @@ public class FareService {
 
     private static final double AIRPORT_RATE_PER_KM = 26.0;
 
-    public List<QuoteResponse> search(String pickup, String drop, String tripType) {
-        int distance = googleMapsService.getDistance(pickup, drop);
+    public List<QuoteResponse> search(String pickup, String drop, String tripType,
+                                      Double pickupLat, Double pickupLng, Double dropLat, Double dropLng) {
+        int distance = googleMapsService.getDistance(pickup, drop, pickupLat, pickupLng, dropLat, dropLng);
+
         List<Vehicle> vehicles = vehicleRepository.findAll();
 
         boolean isAirportTrip = containsAirport(pickup) || containsAirport(drop);
