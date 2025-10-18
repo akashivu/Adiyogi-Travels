@@ -66,7 +66,8 @@ public class SecurityConfig {
                 "http://localhost:*",
                 "https://adiyogicabz.com",
                 "https://www.adiyogicabz.com",
-                "https://vijaytravels.netlify.app"
+                "https://vijaytravels.netlify.app",
+                "https://adiyogi-travels.onrender.com"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
