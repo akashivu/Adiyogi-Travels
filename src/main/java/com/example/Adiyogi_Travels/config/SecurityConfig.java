@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/bookings/my-bookings").authenticated()
                         .requestMatchers("/api/bookings/confirm").authenticated()
                         .requestMatchers("/api/rental/**").permitAll()
-                        .requestMatchers("/api/airport/**").permitAll()
+                        .requestMatchers("/api/airport/cars").permitAll()
                         .anyRequest().authenticated()
 
                 )
