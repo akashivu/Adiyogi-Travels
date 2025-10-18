@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/bookings/*/cancel").permitAll()
                         .requestMatchers("/api/bookings/my-bookings").authenticated()
                         .requestMatchers("/api/bookings/confirm").authenticated()
+                        .requestMatchers("/api/rental/**").permitAll()
                         .anyRequest().authenticated()
 
                 )
