@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/bookings/my-bookings").authenticated()
                         .requestMatchers("/api/bookings/confirm").authenticated()
                         .requestMatchers("/api/rental/**").permitAll()
-                        .requestMatchers("/api/airport/cars").permitAll()
+                        .requestMatchers("/api/airporttab/**").permitAll()
                         .anyRequest().authenticated()
 
                 )
@@ -61,7 +61,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-       
+
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",

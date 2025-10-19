@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/airport")
+@RequestMapping("/api/airporttab")
 public class AirportController {
 
     private final AirportService airportService;
@@ -20,7 +20,7 @@ public class AirportController {
         this.airportService = airportService;
     }
 
-    @GetMapping("/cars")
+    @GetMapping("/vehicles")
     public ResponseEntity<List<Car>> getAirportCars() {
         return ResponseEntity.ok(airportService.getAvailableAirportCars());
     }
