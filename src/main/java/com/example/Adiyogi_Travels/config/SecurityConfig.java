@@ -67,9 +67,10 @@ public class SecurityConfig {
                 "http://127.0.0.1:5173",
                 "https://adiyogicabz.com",
                 "https://www.adiyogicabz.com",
-                "https://vijaytravels.netlify.app"
+                "https://vijaytravels.netlify.app",
+                "https://adiyogi-travels.onrender.com"
         ));
-
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "Content-Type"));
