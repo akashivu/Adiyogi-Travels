@@ -1,4 +1,4 @@
-﻿package com.example.Adiyogi_Travels.model;
+package com.example.Adiyogi_Travels.model;
 
 public class AirportCar {
 
