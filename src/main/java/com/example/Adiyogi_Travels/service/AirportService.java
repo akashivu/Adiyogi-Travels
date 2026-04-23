@@ -1,29 +1,37 @@
 package com.example.Adiyogi_Travels.service;
 
-import com.example.Adiyogi_Travels.model.Car;
-import com.example.Adiyogi_Travels.repository.CarRepository;
-import com.example.Adiyogi_Travels.repository.CarRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.Adiyogi_Travels.model.AirportCar;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class AirportService {
 
-    private final CarRepository airportCarRepository;
+    private final List<AirportCar> carList = new ArrayList<>();
 
-    @Autowired
-    public AirportService(CarRepository airportCarRepository) {
-        this.airportCarRepository = airportCarRepository;
+    public AirportService() {
+
+        carList.add(new AirportCar("Mini", 4, 12, 300, "img1"));
+        carList.add(new AirportCar("Sedan", 4, 15, 400, "img2"));
+        carList.add(new AirportCar("SUV", 6, 20, 500, "img3"));
+        carList.add(new AirportCar("Innova", 6, 22, 600, "img4"));
+        carList.add(new AirportCar("Tempo Traveller", 12, 25, 800, "img5"));
     }
 
-
-    public List<Car> getAvailableAirportCars() {
-        return airportCarRepository.findAll();
+    public List<AirportCar> getAllCars() {
+        return carList;
     }
 
+    public double calculateFare(String carName, double distance) {
 
-    public double calculateFare(double distanceInKm) {
-        return distanceInKm * 26;
+        for (AirportCar car : carList) {
+            if (car.getName().equalsIgnoreCase(carName)) {
+                return car.getBaseFare() + (distance * car.getPricePerKm());
+            }
+        }
+
+        throw new RuntimeException("Car not found");
     }
 }
