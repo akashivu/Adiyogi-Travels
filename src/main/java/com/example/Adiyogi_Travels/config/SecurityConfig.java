@@ -39,9 +39,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/quotes").permitAll()
 
                         .requestMatchers("/api/auth/**", "/api/quotes", "/api/bookings/confirm").permitAll()
-                        .requestMatchers("/api/admin/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/send-email").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/bookings/*/cancel").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/bookings/*/cancel")
+                        .hasAnyRole("USER","ADMIN")
                         .requestMatchers("/api/bookings/my-bookings").authenticated()
                         .requestMatchers("/api/bookings/confirm").authenticated()
                         .requestMatchers("/api/rental/**").permitAll()
@@ -70,7 +71,7 @@ public class SecurityConfig {
                 "https://vijaytravels.netlify.app",
                 "https://adiyogi-travels.onrender.com"
         ));
-        config.setAllowedOriginPatterns(List.of("*"));
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "Content-Type"));
