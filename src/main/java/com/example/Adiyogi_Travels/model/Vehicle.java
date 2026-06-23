@@ -22,16 +22,16 @@ public class Vehicle {
     private boolean ac;
 
     @Column(name = "price_per_km")
-    private double pricePerKm;
+    private Double pricePerKm;
 
     @Column(name = "driver_allowance")
-    private double driverAllowance;
+    private Double driverAllowance;
 
     @Column(name = "gst_percent")
-    private double gstPercent;
+    private Double gstPercent;
 
     @Column(name = "extra_km_fare")
-    private double extraKmFare;
+    private Double extraKmFare;
 
     @Column(name = "included_km")
     private Integer includedKm;
