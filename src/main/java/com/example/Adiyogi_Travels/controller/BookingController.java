@@ -102,13 +102,19 @@ public class BookingController {
 
     @PostMapping("/confirm")
     public BookingResponse confirmBooking(@RequestBody BookingRequest req) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        String email = authentication.getName();
+        User user = null;
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found: " + email));
+        if (authentication != null
+                && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getName())) {
+
+            user = userRepository.findByEmail(authentication.getName())
+                    .orElse(null);
+        }
+
         Booking booking = Booking.builder()
                 .tripCategory(req.getTripCategory())
                 .tripType(req.getTripType())
@@ -125,7 +131,7 @@ public class BookingController {
                 .status(BookingStatus.CONFIRMED)
                 .customerName(req.getName())
                 .customerEmail(req.getEmail())
-                .user(user)
+                .user(user)      // null for guest, actual User for logged-in customer
                 .build();
 
         Booking saved = bookingRepository.save(booking);
