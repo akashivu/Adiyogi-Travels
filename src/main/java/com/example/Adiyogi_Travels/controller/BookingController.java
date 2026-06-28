@@ -43,11 +43,17 @@ public class BookingController {
 
     @GetMapping("/my-bookings")
     public List<BookingResponse> getMyBookings() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        User user = null;
+
+        if (authentication != null
+                && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getName())) {
+
+            user = userRepository.findByEmail(authentication.getName())
+                    .orElse(null);
+        }
 
         List<Booking> bookings = bookingRepository.findByUserId(user.getId());
 

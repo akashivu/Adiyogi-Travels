@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/bookings/*/cancel")
                         .hasAnyRole("USER","ADMIN")
                         .requestMatchers("/api/bookings/my-bookings").authenticated()
-                        .requestMatchers("/api/bookings/confirm").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/bookings/confirm").permitAll()
                         .requestMatchers("/api/rental/**").permitAll()
                         .requestMatchers("/api/airport/**").permitAll()
                         .requestMatchers("/api/airporttab/**").permitAll()
