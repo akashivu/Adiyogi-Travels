@@ -34,11 +34,17 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/account/**").permitAll()
+                        .requestMatchers(
+                                "/api/account/login",
+                                "/api/account/register"
+                        ).permitAll()
+
+                        .requestMatchers("/api/account/me")
+                        .authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/quotes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/quotes").permitAll()
 
-                        .requestMatchers("/api/auth/**", "/api/quotes", "/api/bookings/confirm").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/quotes").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/send-email").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/bookings/*/cancel")
@@ -48,6 +54,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/rental/**").permitAll()
                         .requestMatchers("/api/airport/**").permitAll()
                         .requestMatchers("/api/airporttab/**").permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/bookings/estimate"
+                        ).permitAll()
                         .anyRequest().authenticated()
 
                 )

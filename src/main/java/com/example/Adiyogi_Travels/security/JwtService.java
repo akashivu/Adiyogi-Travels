@@ -1,5 +1,6 @@
 package com.example.Adiyogi_Travels.security;
 
+import com.example.Adiyogi_Travels.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import com.example.Adiyogi_Travels.model.User;
 
 @Service
 public class JwtService {
@@ -27,7 +29,13 @@ public class JwtService {
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
 
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -35,16 +43,21 @@ public class JwtService {
     }
 
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+
+    public String generateToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put("userId", user.getId());
+        claims.put("role", user.getRole());
+
         return Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .setClaims(claims)
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24)
+                )
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

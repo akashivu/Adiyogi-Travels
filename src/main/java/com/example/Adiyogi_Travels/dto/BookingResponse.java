@@ -24,4 +24,16 @@ public class BookingResponse {
     private String pickupDate;
     private String pickupTime;
     private String mobileNo;
+    private String status;
+
+   
+
+    public BookingResponse(Long id, String vehicleName, String fromLocation, String toLocation, String tripType, double distanceKm, double fare, String string, String string1, String mobileNo, Object o, String name) {
+    }
+
+    public BookingResponse(Long id, String vehicleName, String fromLocation, String toLocation, String tripType, double distanceKm, double fare, String string, String string1, String mobileNo) {
+    }
+
+    public BookingResponse(Long id, String name, String vehicleName, String fromLocation, String toLocation, String tripType, double distanceKm, double fare, String string, String string1, String mobileNo) {
+    }
 }

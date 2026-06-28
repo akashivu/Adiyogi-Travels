@@ -28,8 +28,12 @@ public class AirportService {
 
             if (car.getName().equalsIgnoreCase(carName)) {
 
+                if (distance <= 30) {
+                    return car.getBaseFare();
+                }
+
                 return car.getBaseFare()
-                        + (distance * car.getPricePerKm());
+                        + ((distance - 30) * car.getPricePerKm());
             }
         }
 

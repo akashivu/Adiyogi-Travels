@@ -2,16 +2,19 @@ package com.example.Adiyogi_Travels.controller;
 
 import com.example.Adiyogi_Travels.dto.LoginRequest;
 import com.example.Adiyogi_Travels.dto.RegisterRequest;
+import com.example.Adiyogi_Travels.dto.UserResponse;
 import com.example.Adiyogi_Travels.model.User;
 import com.example.Adiyogi_Travels.repository.UserRepository;
 import com.example.Adiyogi_Travels.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.Optional;
+import com.example.Adiyogi_Travels.dto.LoginResponse;
 
 @RestController
 @RequestMapping("/api/account")
@@ -34,10 +37,23 @@ public class AccountController {
                 .fullName(req.getFullName())
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
+                .role("USER")
                 .build();
 
         userRepository.save(user);
-        return ResponseEntity.ok("User registered successfully!");
+        userRepository.save(user);
+
+        String jwtToken = jwtService.generateToken(user);
+
+        LoginResponse response = LoginResponse.builder()
+                .token(jwtToken)
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
 
@@ -51,16 +67,39 @@ public class AccountController {
         User user = userOpt.get();
 
 
-        UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
-                .password(user.getPassword())
-                .authorities("USER")
+        String jwtToken = jwtService.generateToken(user);
+
+
+
+
+        LoginResponse response = LoginResponse.builder()
+                .token(jwtToken)
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole())
                 .build();
 
-        String jwtToken = jwtService.generateToken(userDetails);
+        return ResponseEntity.ok(response);
 
+    }
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(
+            Authentication authentication
+    ) {
 
-        return ResponseEntity.ok(Map.of("token", jwtToken));
+        User user = userRepository
+                .findByEmail(authentication.getName())
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
 
+        UserResponse response = UserResponse.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 }

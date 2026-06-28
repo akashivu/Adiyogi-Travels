@@ -2,6 +2,7 @@ package com.example.Adiyogi_Travels.controller;
 
 import com.example.Adiyogi_Travels.dto.BookingRequest;
 import com.example.Adiyogi_Travels.dto.BookingResponse;
+import com.example.Adiyogi_Travels.dto.BookingStatusResponse;
 import com.example.Adiyogi_Travels.model.Booking;
 import com.example.Adiyogi_Travels.model.BookingStatus;
 import com.example.Adiyogi_Travels.model.User;
@@ -53,6 +54,7 @@ public class BookingController {
         return bookings.stream()
                 .map(b -> new BookingResponse(
                         b.getId(),
+                        b.getStatus().name(),
                         b.getVehicleName(),
                         b.getFromLocation(),
                         b.getToLocation(),
@@ -94,6 +96,13 @@ public class BookingController {
 
     @PostMapping("/confirm")
     public BookingResponse confirmBooking(@RequestBody BookingRequest req) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found: " + email));
         Booking booking = Booking.builder()
                 .tripCategory(req.getTripCategory())
                 .tripType(req.getTripType())
@@ -110,6 +119,7 @@ public class BookingController {
                 .status(BookingStatus.CONFIRMED)
                 .customerName(req.getName())
                 .customerEmail(req.getEmail())
+                .user(user)
                 .build();
 
         Booking saved = bookingRepository.save(booking);
@@ -142,6 +152,7 @@ public class BookingController {
 
         return new BookingResponse(
                 saved.getId(),
+                saved.getStatus().name(),
                 saved.getVehicleName(),
                 saved.getFromLocation(),
                 saved.getToLocation(),
@@ -151,6 +162,34 @@ public class BookingController {
                 saved.getPickupDate().toString(),
                 saved.getPickupTime().toString(),
                 saved.getMobileNo()
+        );
+    }
+
+    @GetMapping("/{bookingId}")
+    public BookingStatusResponse getBookingStatus(
+            @PathVariable Long bookingId,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
+
+
+        if (!booking.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized.");
+        }
+
+        return new BookingStatusResponse(
+                booking.getId(),
+                booking.getStatus().name(),
+                booking.getVehicleName(),
+                booking.getFromLocation(),
+                booking.getToLocation(),
+                booking.getFare(),
+                booking.getPickupDate().toString()
         );
     }
 }
