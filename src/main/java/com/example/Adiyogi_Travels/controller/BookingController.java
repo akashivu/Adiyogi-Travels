@@ -153,14 +153,18 @@ public class BookingController {
                 + "<p><b>Drop:</b> " + saved.getToLocation() + "</p>"
                 + "<p><b>Fare:</b> ₹" + saved.getFare() + "</p>";
 
-        emailService.sendBookingNotifications(
-                req.getEmail(),
-                adminEmail,
-                userSubject,
-                userHtml,
-                adminSubject,
-                adminHtml
-        );
+        try {
+            emailService.sendBookingNotifications(
+                    req.getEmail(),
+                    adminEmail,
+                    userSubject,
+                    userHtml,
+                    adminSubject,
+                    adminHtml
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return new BookingResponse(
                 saved.getId(),

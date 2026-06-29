@@ -1,70 +1,65 @@
 package com.example.Adiyogi_Travels.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${brevo.api.key}")
+    private String apiKey;
 
-    @Value("${app.admin.email:}")
+    @Value("${app.admin.email}")
     private String adminEmail;
 
     @Value("${app.mail.from}")
     private String fromEmail;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    @Async
-    public void sendPlainText(String to, String subject, String body) {
+    public void sendHtmlEmail(String to, String subject, String htmlContent) {
 
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
+        String url = "https://api.brevo.com/v3/smtp/email";
 
-            message.setFrom(fromEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(body);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", apiKey);
 
-            mailSender.send(message);
+        Map<String, Object> body = Map.of(
+                "sender", Map.of(
+                        "name", "AdiyogiCabz",
+                        "email", fromEmail
+                ),
+                "to", List.of(
+                        Map.of("email", to)
+                ),
+                "subject", subject,
+                "htmlContent", htmlContent
+        );
 
-            System.out.println("Plain email sent to: " + to);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    @Async
-    public void sendHtmlEmail(String to, String subject, String htmlBody) {
+        HttpEntity<Map<String, Object>> entity =
+                new HttpEntity<>(body, headers);
 
         try {
 
-            MimeMessage message = mailSender.createMimeMessage();
+            ResponseEntity<String> response =
+                    restTemplate.postForEntity(url, entity, String.class);
 
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(message, true, "UTF-8");
+            System.out.println("Brevo Response: " + response.getStatusCode());
+            System.out.println("Brevo Body: " + response.getBody());
 
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlBody, true);
+        } catch (Exception e) {
 
-            mailSender.send(message);
-
-            System.out.println("HTML email sent to: " + to);
-
-        } catch (MessagingException ex) {
-            ex.printStackTrace();
+            System.err.println("Failed to send email via Brevo");
+            e.printStackTrace();
         }
     }
 
@@ -74,8 +69,7 @@ public class EmailService {
             String subjectUser,
             String htmlUser,
             String subjectAdmin,
-            String htmlAdmin
-    ) {
+            String htmlAdmin) {
 
         sendHtmlEmail(userEmail, subjectUser, htmlUser);
 
