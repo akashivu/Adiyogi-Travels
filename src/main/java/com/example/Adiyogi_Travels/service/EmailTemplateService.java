@@ -73,9 +73,9 @@ public class EmailTemplateService {
 
     private String statusBadge(String status) {
         return switch (status.toUpperCase()) {
-            case "CONFIRMED" -> "<span class='status status-confirmed'>✦ CONFIRMED</span>";
-            case "PENDING"   -> "<span class='status status-pending'>◎ PENDING</span>";
-            case "CANCELLED" -> "<span class='status status-cancelled'>✕ CANCELLED</span>";
+            case "CONFIRMED" -> "<span class='status status-confirmed'>CONFIRMED</span>";
+            case "PENDING"   -> "<span class='status status-pending'>PENDING</span>";
+            case "CANCELLED" -> "<span class='status status-cancelled'>CANCELLED</span>";
             default          -> "<span class='status'>" + status.toUpperCase() + "</span>";
         };
     }
@@ -100,7 +100,6 @@ public class EmailTemplateService {
                     color:white;padding:36px 35px;text-align:center;}
                 .logo-wrap{display:flex;align-items:center;justify-content:center;
                     gap:10px;margin-bottom:10px;}
-                .logo-emoji{font-size:30px;line-height:1;}
                 .logo-text{font-size:24px;font-weight:700;letter-spacing:.4px;}
                 .header-title{font-size:26px;font-weight:700;margin-bottom:6px;}
                 .header-sub{font-size:14px;opacity:.92;}
@@ -109,10 +108,11 @@ public class EmailTemplateService {
                 h2{color:#111827;font-size:20px;margin-bottom:8px;}
                 p{line-height:1.75;font-size:15px;color:#374151;}
 
-                table{width:100%;border-collapse:collapse;margin:22px 0;}
+                table{width:100%;border-collapse:collapse;margin:22px 0;table-layout:fixed;}
                 th{background:#f0fdf4;color:#15803d;padding:13px 15px;text-align:left;
                     width:38%;border:1px solid #dcfce7;font-size:13px;font-weight:600;}
-                td{padding:13px 15px;border:1px solid #e5e7eb;font-size:14px;color:#374151;}
+                td{padding:13px 15px;border:1px solid #e5e7eb;font-size:14px;color:#374151;
+                    font-variant-numeric:tabular-nums;word-break:break-word;}
 
                 .status{display:inline-block;padding:5px 14px;border-radius:30px;
                     font-weight:700;font-size:12px;letter-spacing:.5px;}
@@ -134,6 +134,13 @@ public class EmailTemplateService {
 
                 .divider{height:1px;background:#e5e7eb;margin:26px 0;}
 
+                .otp-box{text-align:center;background:#f0fdf4;
+                    border:2px dashed #22c55e;border-radius:12px;
+                    padding:25px;margin:25px 0;}
+                .otp-code{font-size:42px;font-weight:bold;color:#16a34a;
+                    letter-spacing:8px;font-variant-numeric:tabular-nums;
+                    white-space:nowrap;}
+
                 .footer{background:#f8fafc;padding:24px 35px;text-align:center;
                     color:#6b7280;font-size:13px;border-top:1px solid #e5e7eb;}
                 .footer a{color:#16a34a;text-decoration:none;font-weight:600;}
@@ -142,11 +149,24 @@ public class EmailTemplateService {
 
                 @media(max-width:620px){
                     body{padding:10px;}
+                    .header{padding:28px 22px;}
+                    .header-title{font-size:22px;}
                     .content{padding:20px;}
-                    table,tr,td,th{display:block;width:100%;}
-                    th{border-bottom:none;}
-                    td{border-top:none;margin-bottom:8px;}
+                    table{table-layout:auto;}
+                    table,tbody,tr{display:block;width:100%;}
+                    tr{display:flex;flex-wrap:wrap;align-items:center;
+                        justify-content:space-between;column-gap:12px;
+                        border:1px solid #e5e7eb;border-radius:10px;
+                        margin-bottom:8px;overflow:hidden;}
+                    th{display:block;width:auto;flex:0 0 auto;border:none;
+                        background:transparent;padding:10px 0 10px 14px;
+                        font-size:13px;color:#6b7280;font-weight:600;}
+                    td{display:block;width:auto;flex:0 1 auto;border:none;
+                        padding:10px 14px 10px 0;font-size:14px;font-weight:600;
+                        color:#111827;text-align:right;white-space:nowrap;
+                        overflow:hidden;text-overflow:ellipsis;}
                     .footer-links{flex-direction:column;gap:8px;}
+                    .otp-code{font-size:30px;letter-spacing:5px;}
                 }
                 </style>
                 """;
@@ -158,7 +178,7 @@ public class EmailTemplateService {
 
     private String row(String emoji, String label, Object value) {
         return "<tr>"
-                + "<th>" + emoji + "&nbsp; " + label + "</th>"
+                + "<th>" + label + "</th>"
                 + "<td>" + String.valueOf(value) + "</td>"
                 + "</tr>\n";
     }
@@ -170,7 +190,6 @@ public class EmailTemplateService {
     private String header(String title, String subtitle) {
         return "<div class='header'>"
                 + "<div class='logo-wrap'>"
-                + "<span class='logo-emoji'>🚖</span>"
                 + "<span class='logo-text'>AdiyogiCabz</span>"
                 + "</div>"
                 + "<div class='header-title'>" + title + "</div>"
@@ -204,32 +223,32 @@ public class EmailTemplateService {
 
         String successCard =
                 "<div class='card-success'>"
-                        + "<div class='card-success-title'>✅ Booking Confirmed</div>"
+                        + "<div class='card-success-title'>Booking Confirmed</div>"
                         + "<p>Your cab has been booked successfully.</p>"
                         + "<p>Driver details will be shared approximately "
                         + "<strong>30–60 minutes before pickup.</strong></p>"
                         + "</div>";
 
         String table = "<table>\n"
-                + row("🔖", "Booking Reference", ref)
-                + row("📌", "Status",            status)
-                + row("🚗", "Vehicle",           booking.getVehicleName())
-                + row("🛣️", "Trip Type",         booking.getTripType())
-                + row("📍", "Pickup",            booking.getFromLocation())
-                + row("🏁", "Destination",       booking.getToLocation())
-                + row("📅", "Pickup Date",       date)
-                + row("⏰", "Pickup Time",       time)
-                + row("📱", "Mobile",            booking.getMobileNo())
-                + row("📏", "Distance",          booking.getDistanceKm() + " km")
-                + row("💰", "Fare",              fare)
+                + row("", "Booking Reference", ref)
+                + row("", "Status",            status)
+                + row("", "Vehicle",           booking.getVehicleName())
+                + row("", "Trip Type",         booking.getTripType())
+                + row("", "Pickup",            booking.getFromLocation())
+                + row("", "Destination",       booking.getToLocation())
+                + row("", "Pickup Date",       date)
+                + row("", "Pickup Time",       time)
+                + row("", "Mobile",            booking.getMobileNo())
+                + row("", "Distance",          booking.getDistanceKm() + " km")
+                + row("", "Fare",              fare)
                 + "</table>";
 
         String helpCard =
                 "<div class='card'>"
-                        + "<div class='card-title'>🙋 Need Help?</div>"
-                        + "<p>📧 <a href='mailto:" + SUPPORT_EMAIL + "'>" + SUPPORT_EMAIL + "</a></p>"
-                        + "<p>📞 <a href='tel:+917676943788'>"            + SUPPORT_PHONE  + "</a></p>"
-                        + "<p>🌐 <a href='https://" + WEBSITE + "'>"      + WEBSITE        + "</a></p>"
+                        + "<div class='card-title'>Need Help?</div>"
+                        + "<p><a href='mailto:" + SUPPORT_EMAIL + "'>" + SUPPORT_EMAIL + "</a></p>"
+                        + "<p><a href='tel:+917676943788'>"            + SUPPORT_PHONE  + "</a></p>"
+                        + "<p><a href='https://" + WEBSITE + "'>"      + WEBSITE        + "</a></p>"
                         + "</div>";
 
         return "<!DOCTYPE html><html><head>"
@@ -238,7 +257,7 @@ public class EmailTemplateService {
                 + "<title>Booking Confirmed – AdiyogiCabz</title>"
                 + styles()
                 + "</head><body><div class='container'>"
-                + header("Booking Confirmed! 🎉",
+                + header("Booking Confirmed!",
                 "Your ride is all set — sit back and relax.")
                 + "<div class='content'>"
                 + "<h2>Hello " + booking.getCustomerName() + ",</h2>"
@@ -268,33 +287,33 @@ public class EmailTemplateService {
 
         String alertCard =
                 "<div class='card-success'>"
-                        + "<div class='card-success-title'>🔔 New Booking Received</div>"
+                        + "<div class='card-success-title'>New Booking Received</div>"
                         + "<p>A new booking has been placed and confirmed. "
                         + "Please assign a driver at the earliest.</p>"
                         + "</div>";
 
         String table = "<table>\n"
-                + row("🔖", "Booking Reference",  ref)
-                + row("📌", "Status",             status)
-                + row("🕐", "Booking Time",       bookedAt)
-                + row("👤", "Customer Name",      booking.getCustomerName())
-                + row("📧", "Customer Email",     booking.getCustomerEmail())
-                + row("📱", "Customer Mobile",    booking.getMobileNo())
-                + row("🚗", "Vehicle",            booking.getVehicleName())
-                + row("🛣️", "Trip Type",          booking.getTripType())
-                + row("📍", "Pickup",             booking.getFromLocation())
-                + row("🏁", "Destination",        booking.getToLocation())
-                + row("📅", "Pickup Date",        date)
-                + row("⏰", "Pickup Time",        time)
-                + row("📏", "Distance",           booking.getDistanceKm() + " km")
-                + row("💰", "Fare",               fare)
+                + row("", "Booking Reference",  ref)
+                + row("", "Status",             status)
+                + row("", "Booking Time",       bookedAt)
+                + row("", "Customer Name",      booking.getCustomerName())
+                + row("", "Customer Email",     booking.getCustomerEmail())
+                + row("", "Customer Mobile",    booking.getMobileNo())
+                + row("", "Vehicle",            booking.getVehicleName())
+                + row("", "Trip Type",          booking.getTripType())
+                + row("", "Pickup",             booking.getFromLocation())
+                + row("", "Destination",        booking.getToLocation())
+                + row("", "Pickup Date",        date)
+                + row("", "Pickup Time",        time)
+                + row("", "Distance",           booking.getDistanceKm() + " km")
+                + row("", "Fare",               fare)
                 + "</table>";
 
         String actionCard =
                 "<div class='card'>"
-                        + "<div class='card-title'>⚡ Action Required</div>"
+                        + "<div class='card-title'>Action Required</div>"
                         + "<p>Log in to the admin panel and assign a driver for this booking.</p>"
-                        + "<p style='margin-top:8px;'>📧 <a href='mailto:" + SUPPORT_EMAIL
+                        + "<p style='margin-top:8px;'><a href='mailto:" + SUPPORT_EMAIL
                         + "'>" + SUPPORT_EMAIL + "</a></p>"
                         + "</div>";
 
@@ -304,7 +323,7 @@ public class EmailTemplateService {
                 + "<title>New Booking Alert – AdiyogiCabz Admin</title>"
                 + styles()
                 + "</head><body><div class='container'>"
-                + header("New Booking Alert 🔔",
+                + header("New Booking Alert",
                 "A new booking has just been confirmed.")
                 + "<div class='content'>"
                 + "<h2>Hello Admin,</h2>"
@@ -327,18 +346,15 @@ public class EmailTemplateService {
     public String buildOtpEmail(String fullName, String otp) {
 
         String otpBox =
-                "<div style='text-align:center;background:#f0fdf4;"
-                        + "border:2px dashed #22c55e;border-radius:12px;"
-                        + "padding:25px;margin:25px 0;'>"
-                        + "<div style='font-size:42px;font-weight:bold;"
-                        + "color:#16a34a;letter-spacing:8px;'>"
+                "<div class='otp-box'>"
+                        + "<div class='otp-code'>"
                         + otp
                         + "</div>"
                         + "</div>";
 
         String noteCard =
                 "<div class='card'>"
-                        + "⏳ This OTP is valid for <strong>10 minutes</strong>."
+                        + "This OTP is valid for <strong>10 minutes</strong>."
                         + "<br><br>"
                         + "For your security, never share this OTP with anyone."
                         + "</div>";
@@ -349,10 +365,10 @@ public class EmailTemplateService {
                 + "<title>Verify Your Email – AdiyogiCabz</title>"
                 + styles()
                 + "</head><body><div class='container'>"
-                + header("🔐 Verify Your Email",
+                + header("Verify Your Email",
                 "Complete your AdiyogiCabz registration")
                 + "<div class='content'>"
-                + "<h2>Hello " + fullName + " 👋</h2>"
+                + "<h2>Hello " + fullName + "</h2>"
                 + "<p>Thank you for registering with <strong>AdiyogiCabz</strong>.</p>"
                 + "<br>"
                 + "<p>Please use the verification code below to activate your account.</p>"
@@ -375,14 +391,14 @@ public class EmailTemplateService {
                 + styles() +
                 """
                 </head>
-    
+
                 <body>
-    
+
                 <div class="container">
-    
+
                 """
                 + header(
-                "🔑 Reset Your Password",
+                "Reset Your Password",
                 "Secure password reset verification"
         )
                 + """
@@ -393,71 +409,60 @@ public class EmailTemplateService {
             """
                 + fullName +
                 """
-                    👋</h2>
-    
+                    </h2>
+
                     <p>
-    
+
                         We received a request to reset your
                         <strong>AdiyogiCabz</strong> account password.
-    
+
                     </p>
-    
+
                     <br>
-    
+
                     <p>
-    
+
                         Use the verification code below to continue.
-    
+
                     </p>
-    
+
                     <br>
-    
-                    <div
-                        style="text-align:center;
-                               background:#f0fdf4;
-                               border:2px dashed #16a34a;
-                               border-radius:12px;
-                               padding:25px;
-                               margin:25px 0;">
-    
-                        <div
-                            style="
-                                font-size:42px;
-                                font-weight:bold;
-                                color:#16a34a;
-                                letter-spacing:8px;">
-    
+
+                    <div class="otp-box">
+
+                        <div class="otp-code">
+
                             """
                 + otp +
                 """
                         </div>
-    
+
                     </div>
-    
+
                     <div class="card">
-    
-                        ⏳ This OTP expires in
+
+                        This OTP expires in
                         <strong>10 minutes</strong>.
-    
+
                         <br><br>
-    
+
                         If you did not request a password reset,
                         please ignore this email.
-    
+
                     </div>
-    
+
                 </div>
-    
+
                 """
                 + footer() +
                 """
-    
+
                 </div>
-    
+
                 </body>
-    
+
                 </html>
-    
+
                 """;
     }
 }

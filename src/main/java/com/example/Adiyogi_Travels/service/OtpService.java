@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class OtpService {
     /**
      * Save or replace OTP for an email
      */
+    @Transactional
     public EmailVerification saveOtp(
             String fullName,
             String email,
@@ -56,6 +58,7 @@ public class OtpService {
     /**
      * Verify OTP
      */
+    @Transactional
     public EmailVerification verifyOtp(
             String email,
             String otp,
@@ -98,6 +101,7 @@ public class OtpService {
     /**
      * Remove OTP after successful registration
      */
+    @Transactional
     public void deleteOtp(
             String email,
             OtpPurpose purpose
@@ -107,6 +111,7 @@ public class OtpService {
                 .deleteByEmailAndPurpose(email, purpose);
 
     }
+    @Transactional
     public String resendOtp(
             String email,
             OtpPurpose purpose
