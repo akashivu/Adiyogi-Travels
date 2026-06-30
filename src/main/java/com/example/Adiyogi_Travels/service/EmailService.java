@@ -1,5 +1,7 @@
 package com.example.Adiyogi_Travels.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +16,8 @@ import java.util.Map;
 @Service
 public class EmailService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+
     @Value("${brevo.api.key}")
     private String apiKey;
 
@@ -24,8 +28,13 @@ public class EmailService {
     private String fromEmail;
 
     private final RestTemplate restTemplate = new RestTemplate();
-
-    public void sendHtmlEmail(String to, String subject, String htmlContent) {
+    private final EmailTemplateService emailTemplateService;
+    public EmailService(
+            EmailTemplateService emailTemplateService
+    ) {
+        this.emailTemplateService = emailTemplateService;
+    }
+    public boolean sendHtmlEmail(String to, String subject, String htmlContent) {
 
         String url = "https://api.brevo.com/v3/smtp/email";
 
@@ -53,17 +62,19 @@ public class EmailService {
             ResponseEntity<String> response =
                     restTemplate.postForEntity(url, entity, String.class);
 
-            System.out.println("Brevo Response: " + response.getStatusCode());
-            System.out.println("Brevo Body: " + response.getBody());
+            logger.info("Brevo Response: {}", response.getStatusCode());
+            logger.debug("Brevo Body: {}", response.getBody());
+
+            return response.getStatusCode().is2xxSuccessful();
 
         } catch (Exception e) {
 
-            System.err.println("Failed to send email via Brevo");
-            e.printStackTrace();
+            logger.error("Failed to send email via Brevo", e);
+            return false;
         }
     }
 
-    public void sendBookingNotifications(
+    public boolean sendBookingNotifications(
             String userEmail,
             String adminEmailOverride,
             String subjectUser,
@@ -71,15 +82,55 @@ public class EmailService {
             String subjectAdmin,
             String htmlAdmin) {
 
-        sendHtmlEmail(userEmail, subjectUser, htmlUser);
+        boolean userSent = sendHtmlEmail(userEmail, subjectUser, htmlUser);
 
         String admin =
                 (adminEmailOverride != null && !adminEmailOverride.isBlank())
                         ? adminEmailOverride
                         : adminEmail;
 
+        boolean adminSent = true;
+
         if (admin != null && !admin.isBlank()) {
-            sendHtmlEmail(admin, subjectAdmin, htmlAdmin);
+            adminSent = sendHtmlEmail(admin, subjectAdmin, htmlAdmin);
         }
+
+        return userSent && adminSent;
+    }
+    public boolean sendOtpEmail(
+            String email,
+            String fullName,
+            String otp
+    ) {
+
+        String subject = "Verify Your Email | AdiyogiCabz";
+
+        String html =
+                emailTemplateService
+                        .buildOtpEmail(fullName, otp);
+
+        return sendHtmlEmail(
+                email,
+                subject,
+                html
+        );
+
+    }
+    public void sendForgotPasswordOtpEmail(
+            String email,
+            String fullName,
+            String otp
+    ) {
+
+        String subject = "Reset Your Password | AdiyogiCabz";
+
+        String html = emailTemplateService
+                .buildForgotPasswordOtpEmail(fullName, otp);
+
+        sendHtmlEmail(
+                email,
+                subject,
+                html
+        );
     }
 }

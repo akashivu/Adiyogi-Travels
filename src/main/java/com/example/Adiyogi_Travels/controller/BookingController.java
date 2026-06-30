@@ -9,9 +9,12 @@ import com.example.Adiyogi_Travels.model.User;
 import com.example.Adiyogi_Travels.repository.BookingRepository;
 import com.example.Adiyogi_Travels.repository.UserRepository;
 import com.example.Adiyogi_Travels.service.EmailService;
+import com.example.Adiyogi_Travels.service.EmailTemplateService;
 import com.example.Adiyogi_Travels.service.GoogleMapsService;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -26,33 +29,51 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class BookingController {
 
-    @Autowired
-    private BookingRepository bookingRepository;
+    private static final Logger logger = LoggerFactory.getLogger(BookingController.class);
 
-    @Autowired
-    private GoogleMapsService mapsService;
+    private final BookingRepository bookingRepository;
+    private final GoogleMapsService mapsService;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
+    private final EmailTemplateService emailTemplateService;
 
-    @Autowired
-    private UserRepository userRepository;
+    public BookingController(
+            BookingRepository bookingRepository,
+            GoogleMapsService mapsService,
+            UserRepository userRepository,
+            EmailService emailService,
+            EmailTemplateService emailTemplateService) {
 
-    @Autowired
-    private EmailService emailService;
+        this.bookingRepository = bookingRepository;
+        this.mapsService = mapsService;
+        this.userRepository = userRepository;
+        this.emailService = emailService;
+        this.emailTemplateService = emailTemplateService;
+    }
 
     @Value("${app.admin.email:vijaytourstravels6158@gmail.com}")
     private String adminEmail;
 
+    private User getAuthenticatedUser() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getName())) {
+            return null;
+        }
+
+        return userRepository.findByEmail(authentication.getName())
+                .orElse(null);
+    }
+
     @GetMapping("/my-bookings")
     public List<BookingResponse> getMyBookings() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = getAuthenticatedUser();
 
-        User user = null;
-
-        if (authentication != null
-                && authentication.isAuthenticated()
-                && !"anonymousUser".equals(authentication.getName())) {
-
-            user = userRepository.findByEmail(authentication.getName())
-                    .orElse(null);
+        if (user == null) {
+            throw new RuntimeException("Please login to view your bookings.");
         }
 
         List<Booking> bookings = bookingRepository.findByUserId(user.getId());
@@ -101,19 +122,9 @@ public class BookingController {
     }
 
     @PostMapping("/confirm")
-    public BookingResponse confirmBooking(@RequestBody BookingRequest req) {
+    public BookingResponse confirmBooking(@Valid @RequestBody BookingRequest req) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        User user = null;
-
-        if (authentication != null
-                && authentication.isAuthenticated()
-                && !"anonymousUser".equals(authentication.getName())) {
-
-            user = userRepository.findByEmail(authentication.getName())
-                    .orElse(null);
-        }
+        User user = getAuthenticatedUser();
 
         Booking booking = Booking.builder()
                 .tripCategory(req.getTripCategory())
@@ -136,34 +147,45 @@ public class BookingController {
 
         Booking saved = bookingRepository.save(booking);
 
-        String userSubject = "Your booking is confirmed — " + saved.getVehicleName();
-        String userHtml = "<h3>Booking Confirmed</h3>"
-                + "<p><b>Name:</b> " + req.getName() + "</p>"
-                + "<p><b>Pickup:</b> " + saved.getFromLocation() + "</p>"
-                + "<p><b>Drop:</b> " + saved.getToLocation() + "</p>"
-                + "<p><b>Fare:</b> ₹" + saved.getFare() + "</p>"
-                + "<p><b>Pickup Date:</b> " + saved.getPickupDate() + " " + saved.getPickupTime() + "</p>"
-                + "<hr><p>Thank you for choosing Vijay Travels!</p>";
+        logger.info(
+                "Booking {} created successfully for customer {}",
+                saved.getId(),
+                saved.getCustomerEmail()
+        );
 
-        String adminSubject = "New Booking — " + saved.getVehicleName();
-        String adminHtml = "<h3>New Booking Alert</h3>"
-                + "<p><b>Name:</b> " + req.getName() + "</p>"
-                + "<p><b>Email:</b> " + req.getEmail() + "</p>"
-                + "<p><b>Pickup:</b> " + saved.getFromLocation() + "</p>"
-                + "<p><b>Drop:</b> " + saved.getToLocation() + "</p>"
-                + "<p><b>Fare:</b> ₹" + saved.getFare() + "</p>";
+        String userSubject =
+                "Booking Confirmed | AdiyogiCabz | " + saved.getVehicleName();
+
+        String adminSubject =
+                "🚖 New Booking | " + saved.getCustomerName();
+
+        String userHtml =
+                emailTemplateService.buildCustomerBookingEmail(saved);
+
+        String adminHtml =
+                emailTemplateService.buildAdminBookingEmail(saved);
 
         try {
+
             emailService.sendBookingNotifications(
+
                     req.getEmail(),
                     adminEmail,
+
                     userSubject,
                     userHtml,
+
                     adminSubject,
                     adminHtml
+
             );
+
+            logger.info("Booking confirmation emails sent for booking {}", saved.getId());
+
         } catch (Exception e) {
-            e.printStackTrace();
+
+            logger.error("Failed to send booking confirmation email", e);
+
         }
 
         return new BookingResponse(
@@ -194,7 +216,9 @@ public class BookingController {
                 .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
 
 
-        if (!booking.getUser().getId().equals(user.getId())) {
+        if (booking.getUser() == null ||
+                !booking.getUser().getId().equals(user.getId())) {
+
             throw new RuntimeException("Unauthorized.");
         }
 
@@ -209,4 +233,3 @@ public class BookingController {
         );
     }
 }
-
