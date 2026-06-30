@@ -37,20 +37,18 @@ public class OtpService {
             OtpPurpose purpose
     ) {
 
-        emailVerificationRepository
-                .findByEmailAndPurpose(email, purpose)
-                .ifPresent(emailVerificationRepository::delete);
-
         EmailVerification verification =
-                EmailVerification.builder()
-                        .fullName(fullName)
-                        .email(email)
-                        .password(encodedPassword)
-                        .otp(otp)
-                        .purpose(purpose)
-                        .expiresAt(LocalDateTime.now().plusMinutes(10))
-                        .verified(false)
-                        .build();
+                emailVerificationRepository
+                        .findByEmailAndPurpose(email, purpose)
+                        .orElse(new EmailVerification());
+
+        verification.setFullName(fullName);
+        verification.setEmail(email);
+        verification.setPassword(encodedPassword);
+        verification.setOtp(otp);
+        verification.setPurpose(purpose);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+        verification.setVerified(false);
 
         return emailVerificationRepository.save(verification);
     }
