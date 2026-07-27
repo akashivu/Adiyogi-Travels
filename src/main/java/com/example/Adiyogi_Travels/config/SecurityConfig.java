@@ -85,7 +85,9 @@ public class SecurityConfig {
                 "https://adiyogicabz.com",
                 "https://www.adiyogicabz.com",
                 "https://vijaytravels.netlify.app",
-                "https://adiyogi-travels.onrender.com"
+                "https://adiyogi-travels.onrender.com",
+                "https://elixway.com",
+                "https://www.elixway.com"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
