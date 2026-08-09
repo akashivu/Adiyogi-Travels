@@ -61,6 +61,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/airporttab/**").permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
+                                "/api/flights/search"
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
                                 "/api/bookings/estimate"
                         ).permitAll()
                         .anyRequest().authenticated()

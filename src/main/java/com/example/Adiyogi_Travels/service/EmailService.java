@@ -27,6 +27,9 @@ public class EmailService {
     @Value("${app.mail.from}")
     private String fromEmail;
 
+    @Value("${app.mail.sender-name}")
+    private String senderName;
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final EmailTemplateService emailTemplateService;
     public EmailService(
@@ -44,7 +47,7 @@ public class EmailService {
 
         Map<String, Object> body = Map.of(
                 "sender", Map.of(
-                        "name", "AdiyogiCabz",
+                        "name", senderName,
                         "email", fromEmail
                 ),
                 "to", List.of(
@@ -103,7 +106,7 @@ public class EmailService {
             String otp
     ) {
 
-        String subject = "Verify Your Email | AdiyogiCabz";
+        String subject = "Verify Your Email | ElixWay";
 
         String html =
                 emailTemplateService
@@ -122,7 +125,7 @@ public class EmailService {
             String otp
     ) {
 
-        String subject = "Reset Your Password | AdiyogiCabz";
+        String subject = "Reset Your Password | ElixWay";
 
         String html = emailTemplateService
                 .buildForgotPasswordOtpEmail(fullName, otp);
