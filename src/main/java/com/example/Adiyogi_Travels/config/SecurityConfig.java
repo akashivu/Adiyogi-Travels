@@ -67,11 +67,12 @@ public class SecurityConfig {
                                 HttpMethod.POST,
                                 "/api/bookings/estimate"
                         ).permitAll()
-                        .anyRequest().authenticated()
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/hotels/search"
                         ).permitAll()
+                        .anyRequest().authenticated()
+
 
                 )
           .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
