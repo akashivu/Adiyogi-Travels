@@ -68,6 +68,10 @@ public class SecurityConfig {
                                 "/api/bookings/estimate"
                         ).permitAll()
                         .anyRequest().authenticated()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/hotels/search"
+                        ).permitAll()
 
                 )
           .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
