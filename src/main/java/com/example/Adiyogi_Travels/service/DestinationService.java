@@ -1,14 +1,13 @@
 package com.example.Adiyogi_Travels.service;
 
 import com.example.Adiyogi_Travels.client.GooglePlacesClient;
+import com.example.Adiyogi_Travels.dto.google.GoogleNearbyPlace;
 import com.example.Adiyogi_Travels.dto.google.GooglePlace;
 import com.example.Adiyogi_Travels.dto.google.GooglePlaceDetails;
 import com.example.Adiyogi_Travels.model.Destination;
 import com.example.Adiyogi_Travels.repository.DestinationRepository;
 import org.springframework.stereotype.Service;
-import com.example.Adiyogi_Travels.dto.google.GoogleNearbyPlace;
 
-import java.util.List;
 import java.util.List;
 
 @Service
@@ -28,10 +27,15 @@ public class DestinationService {
                 googlePlacesClient;
     }
 
+
+    
+
     public List<Destination> getAllDestinations() {
 
         return destinationRepository.findAll();
     }
+
+
 
     public Destination getDestinationBySlug(
             String slug
@@ -46,6 +50,8 @@ public class DestinationService {
                 );
     }
 
+
+
     public Destination syncGooglePlace(
             String slug
     ) {
@@ -53,13 +59,17 @@ public class DestinationService {
         Destination destination =
                 getDestinationBySlug(slug);
 
+
         GooglePlace googlePlace =
                 googlePlacesClient.searchDestination(
                         destination.getName(),
                         destination.getCountry()
                 );
 
-        if (googlePlace == null) {
+
+        if (googlePlace == null ||
+                googlePlace.id() == null ||
+                googlePlace.id().isBlank()) {
 
             throw new RuntimeException(
                     "No Google Place found for destination: "
@@ -67,14 +77,19 @@ public class DestinationService {
             );
         }
 
+
         destination.setGooglePlaceId(
                 googlePlace.id()
         );
+
 
         return destinationRepository.save(
                 destination
         );
     }
+
+
+
     public GooglePlaceDetails getGooglePlaceDetails(
             String slug
     ) {
@@ -82,25 +97,50 @@ public class DestinationService {
         Destination destination =
                 getDestinationBySlug(slug);
 
-        if (destination.getGooglePlaceId() == null ||
-                destination.getGooglePlaceId().isBlank()) {
+
+        String googlePlaceId =
+                destination.getGooglePlaceId();
+
+
+
+
+        if (googlePlaceId == null ||
+                googlePlaceId.isBlank()) {
+
+            destination =
+                    syncGooglePlace(slug);
+
+            googlePlaceId =
+                    destination.getGooglePlaceId();
+        }
+
+
+
+
+        if (googlePlaceId == null ||
+                googlePlaceId.isBlank()) {
 
             throw new RuntimeException(
-                    "Google Place ID not available for: "
+                    "Google Place ID could not be resolved for: "
                             + destination.getName()
             );
         }
 
+
         return googlePlacesClient.getPlaceDetails(
-                destination.getGooglePlaceId()
+                googlePlaceId
         );
     }
+
+
+
     public List<GoogleNearbyPlace> getNearbyAttractions(
             String slug
     ) {
 
         Destination destination =
                 getDestinationBySlug(slug);
+
 
         if (destination.getLatitude() == null ||
                 destination.getLongitude() == null) {
@@ -111,11 +151,15 @@ public class DestinationService {
             );
         }
 
+
         return googlePlacesClient.searchNearbyAttractions(
                 destination.getLatitude(),
                 destination.getLongitude()
         );
     }
+
+
+
     public List<GoogleNearbyPlace> getNearbyPlaces(
             String slug,
             String type
@@ -124,6 +168,7 @@ public class DestinationService {
         Destination destination =
                 getDestinationBySlug(slug);
 
+
         if (destination.getLatitude() == null ||
                 destination.getLongitude() == null) {
 
@@ -132,6 +177,7 @@ public class DestinationService {
                             + destination.getName()
             );
         }
+
 
         return googlePlacesClient.searchNearby(
                 destination.getLatitude(),
