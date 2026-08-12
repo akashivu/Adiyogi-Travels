@@ -112,4 +112,5 @@ public class DestinationController {
 
         return ResponseEntity.ok(photoUri);
     }
+
 }
