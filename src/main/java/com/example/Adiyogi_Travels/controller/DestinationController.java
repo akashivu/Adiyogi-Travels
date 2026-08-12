@@ -54,6 +54,7 @@ public class DestinationController {
                         .syncGooglePlace(slug)
         );
     }
+
     @GetMapping("/{slug}/google-details")
     public ResponseEntity<GooglePlaceDetails>
     getGooglePlaceDetails(
@@ -65,6 +66,7 @@ public class DestinationController {
                         .getGooglePlaceDetails(slug)
         );
     }
+
     @GetMapping("/{slug}/nearby-attractions")
     public ResponseEntity<List<GoogleNearbyPlace>>
     getNearbyAttractions(
@@ -76,6 +78,7 @@ public class DestinationController {
                         .getNearbyAttractions(slug)
         );
     }
+
     @GetMapping("/{slug}/nearby")
     public ResponseEntity<List<GoogleNearbyPlace>>
     getNearbyPlaces(
@@ -89,5 +92,24 @@ public class DestinationController {
                         type
                 )
         );
+    }
+
+    @GetMapping("/place-photo")
+    public ResponseEntity<String> getPlacePhoto(
+            @RequestParam String photoName
+    ) {
+
+        String photoUri =
+                destinationService.getPlacePhoto(
+                        photoName
+                );
+
+        if (photoUri == null ||
+                photoUri.isBlank()) {
+
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(photoUri);
     }
 }

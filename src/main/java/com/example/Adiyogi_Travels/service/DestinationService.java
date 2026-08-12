@@ -28,7 +28,7 @@ public class DestinationService {
     }
 
 
-    
+
 
     public List<Destination> getAllDestinations() {
 
@@ -183,6 +183,15 @@ public class DestinationService {
                 destination.getLatitude(),
                 destination.getLongitude(),
                 type
+        );
+    }
+    public String getPlacePhoto(
+            String photoName
+    ) {
+
+        return googlePlacesClient.getPlacePhotoUri(
+                photoName,
+                800
         );
     }
 }

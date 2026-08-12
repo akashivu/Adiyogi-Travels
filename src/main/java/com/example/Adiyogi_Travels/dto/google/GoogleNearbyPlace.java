@@ -8,6 +8,7 @@ public record GoogleNearbyPlace(
         String formattedAddress,
         GoogleLocation location,
         String primaryType,
-        List<String> types
+        List<String> types,
+        List<GooglePhoto> photos
 ) {
 }
