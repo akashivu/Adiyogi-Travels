@@ -71,6 +71,11 @@ public class SecurityConfig {
                                 HttpMethod.POST,
                                 "/api/hotels/search"
                         ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/destinations",
+                                "/api/destinations/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
 
 
