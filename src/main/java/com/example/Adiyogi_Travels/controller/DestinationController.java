@@ -1,5 +1,6 @@
 package com.example.Adiyogi_Travels.controller;
 
+import com.example.Adiyogi_Travels.dto.google.GoogleNearbyPlace;
 import com.example.Adiyogi_Travels.dto.google.GooglePlaceDetails;
 import com.example.Adiyogi_Travels.model.Destination;
 import com.example.Adiyogi_Travels.service.DestinationService;
@@ -62,6 +63,17 @@ public class DestinationController {
         return ResponseEntity.ok(
                 destinationService
                         .getGooglePlaceDetails(slug)
+        );
+    }
+    @GetMapping("/{slug}/nearby-attractions")
+    public ResponseEntity<List<GoogleNearbyPlace>>
+    getNearbyAttractions(
+            @PathVariable String slug
+    ) {
+
+        return ResponseEntity.ok(
+                destinationService
+                        .getNearbyAttractions(slug)
         );
     }
 }

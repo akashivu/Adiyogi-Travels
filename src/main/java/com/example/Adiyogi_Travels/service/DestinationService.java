@@ -6,7 +6,9 @@ import com.example.Adiyogi_Travels.dto.google.GooglePlaceDetails;
 import com.example.Adiyogi_Travels.model.Destination;
 import com.example.Adiyogi_Travels.repository.DestinationRepository;
 import org.springframework.stereotype.Service;
+import com.example.Adiyogi_Travels.dto.google.GoogleNearbyPlace;
 
+import java.util.List;
 import java.util.List;
 
 @Service
@@ -91,6 +93,27 @@ public class DestinationService {
 
         return googlePlacesClient.getPlaceDetails(
                 destination.getGooglePlaceId()
+        );
+    }
+    public List<GoogleNearbyPlace> getNearbyAttractions(
+            String slug
+    ) {
+
+        Destination destination =
+                getDestinationBySlug(slug);
+
+        if (destination.getLatitude() == null ||
+                destination.getLongitude() == null) {
+
+            throw new RuntimeException(
+                    "Destination coordinates not available: "
+                            + destination.getName()
+            );
+        }
+
+        return googlePlacesClient.searchNearbyAttractions(
+                destination.getLatitude(),
+                destination.getLongitude()
         );
     }
 }
