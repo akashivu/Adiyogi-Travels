@@ -140,4 +140,52 @@ public class GooglePlacesClient {
 
         return response.places();
     }
+    public List<GoogleNearbyPlace> searchNearby(
+            double latitude,
+            double longitude,
+            String placeType
+    ) {
+
+        Map<String, Object> requestBody = Map.of(
+                "includedTypes", List.of(placeType),
+                "maxResultCount", 10,
+                "rankPreference", "POPULARITY",
+                "locationRestriction",
+                Map.of(
+                        "circle",
+                        Map.of(
+                                "center",
+                                Map.of(
+                                        "latitude", latitude,
+                                        "longitude", longitude
+                                ),
+                                "radius", 10000.0
+                        )
+                )
+        );
+
+        GoogleNearbySearchResponse response =
+                restClient.post()
+                        .uri("/places:searchNearby")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Goog-Api-Key", apiKey)
+                        .header(
+                                "X-Goog-FieldMask",
+                                "places.id," +
+                                        "places.displayName," +
+                                        "places.formattedAddress," +
+                                        "places.location," +
+                                        "places.primaryType," +
+                                        "places.types"
+                        )
+                        .body(requestBody)
+                        .retrieve()
+                        .body(GoogleNearbySearchResponse.class);
+
+        if (response == null || response.places() == null) {
+            return List.of();
+        }
+
+        return response.places();
+    }
 }

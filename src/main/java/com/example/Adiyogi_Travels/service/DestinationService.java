@@ -116,4 +116,27 @@ public class DestinationService {
                 destination.getLongitude()
         );
     }
+    public List<GoogleNearbyPlace> getNearbyPlaces(
+            String slug,
+            String type
+    ) {
+
+        Destination destination =
+                getDestinationBySlug(slug);
+
+        if (destination.getLatitude() == null ||
+                destination.getLongitude() == null) {
+
+            throw new RuntimeException(
+                    "Destination coordinates not available: "
+                            + destination.getName()
+            );
+        }
+
+        return googlePlacesClient.searchNearby(
+                destination.getLatitude(),
+                destination.getLongitude(),
+                type
+        );
+    }
 }

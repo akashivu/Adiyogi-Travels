@@ -76,4 +76,18 @@ public class DestinationController {
                         .getNearbyAttractions(slug)
         );
     }
+    @GetMapping("/{slug}/nearby")
+    public ResponseEntity<List<GoogleNearbyPlace>>
+    getNearbyPlaces(
+            @PathVariable String slug,
+            @RequestParam String type
+    ) {
+
+        return ResponseEntity.ok(
+                destinationService.getNearbyPlaces(
+                        slug,
+                        type
+                )
+        );
+    }
 }
