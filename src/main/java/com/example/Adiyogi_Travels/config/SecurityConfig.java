@@ -76,6 +76,10 @@ public class SecurityConfig {
                                 "/api/destinations",
                                 "/api/destinations/**"
                         ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/destinations/*/google-sync"
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
 
 

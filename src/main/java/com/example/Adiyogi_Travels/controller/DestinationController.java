@@ -1,9 +1,6 @@
 package com.example.Adiyogi_Travels.controller;
 
 import com.example.Adiyogi_Travels.model.Destination;
-
-
-import com.example.Adiyogi_Travels.model.Destination;
 import com.example.Adiyogi_Travels.service.DestinationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +9,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/destinations")
-@CrossOrigin(origins = "*")
 public class DestinationController {
 
     private final DestinationService destinationService;
@@ -20,11 +16,13 @@ public class DestinationController {
     public DestinationController(
             DestinationService destinationService
     ) {
-        this.destinationService = destinationService;
+        this.destinationService =
+                destinationService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Destination>> getAllDestinations() {
+    public ResponseEntity<List<Destination>>
+    getAllDestinations() {
 
         return ResponseEntity.ok(
                 destinationService.getAllDestinations()
@@ -32,12 +30,26 @@ public class DestinationController {
     }
 
     @GetMapping("/{slug}")
-    public ResponseEntity<Destination> getDestination(
+    public ResponseEntity<Destination>
+    getDestination(
             @PathVariable String slug
     ) {
 
         return ResponseEntity.ok(
-                destinationService.getDestinationBySlug(slug)
+                destinationService
+                        .getDestinationBySlug(slug)
+        );
+    }
+
+    @PostMapping("/{slug}/google-sync")
+    public ResponseEntity<Destination>
+    syncGooglePlace(
+            @PathVariable String slug
+    ) {
+
+        return ResponseEntity.ok(
+                destinationService
+                        .syncGooglePlace(slug)
         );
     }
 }
