@@ -53,7 +53,9 @@ public class GooglePlacesClient {
                         )
                         .header(
                                 "X-Goog-FieldMask",
-                                "places.id,places.displayName,places.formattedAddress"
+                                "places.id," +
+                                        "places.displayName," +
+                                        "places.formattedAddress"
                         )
                         .body(requestBody)
                         .retrieve()
@@ -75,14 +77,24 @@ public class GooglePlacesClient {
     ) {
 
         return restClient.get()
-                .uri("/places/{placeId}", googlePlaceId)
+                .uri(
+                        "/places/{placeId}",
+                        googlePlaceId
+                )
                 .header(
                         "X-Goog-Api-Key",
                         apiKey
                 )
                 .header(
                         "X-Goog-FieldMask",
-                        "id,displayName,formattedAddress,location,rating,userRatingCount,websiteUri,photos"
+                        "id," +
+                                "displayName," +
+                                "formattedAddress," +
+                                "location," +
+                                "rating," +
+                                "userRatingCount," +
+                                "websiteUri," +
+                                "photos"
                 )
                 .retrieve()
                 .body(GooglePlaceDetails.class);
@@ -98,10 +110,13 @@ public class GooglePlacesClient {
         Map<String, Object> requestBody = Map.of(
                 "includedTypes",
                 List.of("tourist_attraction"),
+
                 "maxResultCount",
                 10,
+
                 "rankPreference",
                 "POPULARITY",
+
                 "locationRestriction",
                 Map.of(
                         "circle",
@@ -161,10 +176,13 @@ public class GooglePlacesClient {
         Map<String, Object> requestBody = Map.of(
                 "includedTypes",
                 List.of(placeType),
+
                 "maxResultCount",
                 10,
+
                 "rankPreference",
                 "POPULARITY",
+
                 "locationRestriction",
                 Map.of(
                         "circle",
@@ -214,28 +232,45 @@ public class GooglePlacesClient {
     }
 
 
-
     public String getPlacePhotoUri(
             String photoResourceName,
             int maxWidthPx
     ) {
+
         if (photoResourceName == null ||
                 photoResourceName.isBlank()) {
+
             return null;
         }
+
+        String photoPath =
+                "/" +
+                        photoResourceName +
+                        "/media";
 
         GooglePhotoMediaResponse response =
                 restClient.get()
                         .uri(uriBuilder ->
                                 uriBuilder
-                                        .path("/{photoName}/media")
-                                        .queryParam("maxWidthPx", maxWidthPx)
-                                        .queryParam("skipHttpRedirect", "true")
-                                        .build(photoResourceName)
+                                        .path(photoPath)
+                                        .queryParam(
+                                                "maxWidthPx",
+                                                maxWidthPx
+                                        )
+                                        .queryParam(
+                                                "skipHttpRedirect",
+                                                "true"
+                                        )
+                                        .build()
                         )
-                        .header("X-Goog-Api-Key", apiKey)
+                        .header(
+                                "X-Goog-Api-Key",
+                                apiKey
+                        )
                         .retrieve()
-                        .body(GooglePhotoMediaResponse.class);
+                        .body(
+                                GooglePhotoMediaResponse.class
+                        );
 
         if (response == null) {
             return null;
@@ -243,6 +278,8 @@ public class GooglePlacesClient {
 
         return response.photoUri();
     }
+
+
 
     private record GooglePhotoMediaResponse(
             String name,
