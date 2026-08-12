@@ -2,6 +2,7 @@ package com.example.Adiyogi_Travels.service;
 
 import com.example.Adiyogi_Travels.client.GooglePlacesClient;
 import com.example.Adiyogi_Travels.dto.google.GooglePlace;
+import com.example.Adiyogi_Travels.dto.google.GooglePlaceDetails;
 import com.example.Adiyogi_Travels.model.Destination;
 import com.example.Adiyogi_Travels.repository.DestinationRepository;
 import org.springframework.stereotype.Service;
@@ -70,6 +71,26 @@ public class DestinationService {
 
         return destinationRepository.save(
                 destination
+        );
+    }
+    public GooglePlaceDetails getGooglePlaceDetails(
+            String slug
+    ) {
+
+        Destination destination =
+                getDestinationBySlug(slug);
+
+        if (destination.getGooglePlaceId() == null ||
+                destination.getGooglePlaceId().isBlank()) {
+
+            throw new RuntimeException(
+                    "Google Place ID not available for: "
+                            + destination.getName()
+            );
+        }
+
+        return googlePlacesClient.getPlaceDetails(
+                destination.getGooglePlaceId()
         );
     }
 }

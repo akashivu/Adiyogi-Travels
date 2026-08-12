@@ -1,5 +1,6 @@
 package com.example.Adiyogi_Travels.controller;
 
+import com.example.Adiyogi_Travels.dto.google.GooglePlaceDetails;
 import com.example.Adiyogi_Travels.model.Destination;
 import com.example.Adiyogi_Travels.service.DestinationService;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +51,17 @@ public class DestinationController {
         return ResponseEntity.ok(
                 destinationService
                         .syncGooglePlace(slug)
+        );
+    }
+    @GetMapping("/{slug}/google-details")
+    public ResponseEntity<GooglePlaceDetails>
+    getGooglePlaceDetails(
+            @PathVariable String slug
+    ) {
+
+        return ResponseEntity.ok(
+                destinationService
+                        .getGooglePlaceDetails(slug)
         );
     }
 }

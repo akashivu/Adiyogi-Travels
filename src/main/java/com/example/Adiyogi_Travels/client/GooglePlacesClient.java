@@ -62,4 +62,21 @@ public class GooglePlacesClient {
 
         return response.places().get(0);
     }
+    public GooglePlaceDetails getPlaceDetails(
+            String googlePlaceId
+    ) {
+
+        return restClient.get()
+                .uri("/places/{placeId}", googlePlaceId)
+                .header(
+                        "X-Goog-Api-Key",
+                        apiKey
+                )
+                .header(
+                        "X-Goog-FieldMask",
+                        "id,displayName,formattedAddress,location,rating,userRatingCount,websiteUri"
+                )
+                .retrieve()
+                .body(GooglePlaceDetails.class);
+    }
 }
