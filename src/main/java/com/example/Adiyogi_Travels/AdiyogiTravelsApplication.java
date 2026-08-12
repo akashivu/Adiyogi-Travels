@@ -32,6 +32,7 @@ public class AdiyogiTravelsApplication {
                                 .country("France")
                                 .countryCode("FR")
                                 .continent("Europe")
+                                .category("culture")
                                 .shortDescription(
                                         "The city of art, culture and unforgettable experiences."
                                 )
@@ -58,6 +59,7 @@ public class AdiyogiTravelsApplication {
                                 .country("United Arab Emirates")
                                 .countryCode("AE")
                                 .continent("Asia")
+                                .category("cities")
                                 .shortDescription(
                                         "A modern city of architecture, luxury and adventure."
                                 )
@@ -84,6 +86,7 @@ public class AdiyogiTravelsApplication {
                                 .country("Japan")
                                 .countryCode("JP")
                                 .continent("Asia")
+                                .category("culture")
                                 .shortDescription(
                                         "Where tradition meets technology."
                                 )
