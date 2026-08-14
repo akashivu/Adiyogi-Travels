@@ -18,8 +18,7 @@ public class DestinationController {
     public DestinationController(
             DestinationService destinationService
     ) {
-        this.destinationService =
-                destinationService;
+        this.destinationService = destinationService;
     }
 
     @GetMapping
@@ -30,6 +29,7 @@ public class DestinationController {
                 destinationService.getAllDestinations()
         );
     }
+
 
     @GetMapping("/{slug}")
     public ResponseEntity<Destination>
@@ -43,6 +43,8 @@ public class DestinationController {
         );
     }
 
+
+
     @PostMapping("/{slug}/google-sync")
     public ResponseEntity<Destination>
     syncGooglePlace(
@@ -54,6 +56,8 @@ public class DestinationController {
                         .syncGooglePlace(slug)
         );
     }
+
+
 
     @GetMapping("/{slug}/google-details")
     public ResponseEntity<GooglePlaceDetails>
@@ -67,6 +71,24 @@ public class DestinationController {
         );
     }
 
+
+
+    @GetMapping("/places/{placeId}")
+    public ResponseEntity<GooglePlaceDetails>
+    getGooglePlaceDetailsByPlaceId(
+            @PathVariable String placeId
+    ) {
+
+        return ResponseEntity.ok(
+                destinationService
+                        .getGooglePlaceDetailsByPlaceId(
+                                placeId
+                        )
+        );
+    }
+
+
+
     @GetMapping("/{slug}/nearby-attractions")
     public ResponseEntity<List<GoogleNearbyPlace>>
     getNearbyAttractions(
@@ -78,6 +100,8 @@ public class DestinationController {
                         .getNearbyAttractions(slug)
         );
     }
+
+
 
     @GetMapping("/{slug}/nearby")
     public ResponseEntity<List<GoogleNearbyPlace>>
@@ -94,8 +118,11 @@ public class DestinationController {
         );
     }
 
+
+
     @GetMapping("/place-photo")
-    public ResponseEntity<String> getPlacePhoto(
+    public ResponseEntity<String>
+    getPlacePhoto(
             @RequestParam String photoName
     ) {
 
@@ -112,5 +139,4 @@ public class DestinationController {
 
         return ResponseEntity.ok(photoUri);
     }
-
 }

@@ -20,27 +20,17 @@ public class DestinationService {
             DestinationRepository destinationRepository,
             GooglePlacesClient googlePlacesClient
     ) {
-        this.destinationRepository =
-                destinationRepository;
-
-        this.googlePlacesClient =
-                googlePlacesClient;
+        this.destinationRepository = destinationRepository;
+        this.googlePlacesClient = googlePlacesClient;
     }
-
-
-
 
     public List<Destination> getAllDestinations() {
-
         return destinationRepository.findAll();
     }
-
-
 
     public Destination getDestinationBySlug(
             String slug
     ) {
-
         return destinationRepository
                 .findBySlug(slug)
                 .orElseThrow(() ->
@@ -50,8 +40,6 @@ public class DestinationService {
                 );
     }
 
-
-
     public Destination syncGooglePlace(
             String slug
     ) {
@@ -59,13 +47,11 @@ public class DestinationService {
         Destination destination =
                 getDestinationBySlug(slug);
 
-
         GooglePlace googlePlace =
                 googlePlacesClient.searchDestination(
                         destination.getName(),
                         destination.getCountry()
                 );
-
 
         if (googlePlace == null ||
                 googlePlace.id() == null ||
@@ -77,18 +63,14 @@ public class DestinationService {
             );
         }
 
-
         destination.setGooglePlaceId(
                 googlePlace.id()
         );
-
 
         return destinationRepository.save(
                 destination
         );
     }
-
-
 
     public GooglePlaceDetails getGooglePlaceDetails(
             String slug
@@ -97,12 +79,8 @@ public class DestinationService {
         Destination destination =
                 getDestinationBySlug(slug);
 
-
         String googlePlaceId =
                 destination.getGooglePlaceId();
-
-
-
 
         if (googlePlaceId == null ||
                 googlePlaceId.isBlank()) {
@@ -114,9 +92,6 @@ public class DestinationService {
                     destination.getGooglePlaceId();
         }
 
-
-
-
         if (googlePlaceId == null ||
                 googlePlaceId.isBlank()) {
 
@@ -126,13 +101,34 @@ public class DestinationService {
             );
         }
 
-
         return googlePlacesClient.getPlaceDetails(
                 googlePlaceId
         );
     }
 
+    /*
+     * Get Google details directly using
+     * the Google Place ID.
+     *
+     * This is used when the user clicks
+     * a nearby attraction/place card.
+     */
+    public GooglePlaceDetails getGooglePlaceDetailsByPlaceId(
+            String placeId
+    ) {
 
+        if (placeId == null ||
+                placeId.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Google Place ID is required"
+            );
+        }
+
+        return googlePlacesClient.getPlaceDetails(
+                placeId
+        );
+    }
 
     public List<GoogleNearbyPlace> getNearbyAttractions(
             String slug
@@ -140,7 +136,6 @@ public class DestinationService {
 
         Destination destination =
                 getDestinationBySlug(slug);
-
 
         if (destination.getLatitude() == null ||
                 destination.getLongitude() == null) {
@@ -151,14 +146,11 @@ public class DestinationService {
             );
         }
 
-
         return googlePlacesClient.searchNearbyAttractions(
                 destination.getLatitude(),
                 destination.getLongitude()
         );
     }
-
-
 
     public List<GoogleNearbyPlace> getNearbyPlaces(
             String slug,
@@ -168,7 +160,6 @@ public class DestinationService {
         Destination destination =
                 getDestinationBySlug(slug);
 
-
         if (destination.getLatitude() == null ||
                 destination.getLongitude() == null) {
 
@@ -178,13 +169,13 @@ public class DestinationService {
             );
         }
 
-
         return googlePlacesClient.searchNearby(
                 destination.getLatitude(),
                 destination.getLongitude(),
                 type
         );
     }
+
     public String getPlacePhoto(
             String photoName
     ) {
@@ -194,5 +185,4 @@ public class DestinationService {
                 800
         );
     }
-
 }
