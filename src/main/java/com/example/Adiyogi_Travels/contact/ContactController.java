@@ -103,7 +103,7 @@ public class ContactController {
          */
         try {
 
-            contactService.sendContactMessage(request);
+            contactService.saveMessage(request);
 
             return ResponseEntity.ok(
                     Map.of(
