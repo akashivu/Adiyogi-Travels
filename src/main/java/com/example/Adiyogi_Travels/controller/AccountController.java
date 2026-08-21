@@ -23,7 +23,8 @@ import com.example.Adiyogi_Travels.dto.ForgotPasswordRequest;
 import com.example.Adiyogi_Travels.dto.VerifyForgotPasswordOtpRequest;
 import com.example.Adiyogi_Travels.dto.ResetPasswordRequest;
 import com.example.Adiyogi_Travels.model.OtpPurpose;
-
+import com.example.Adiyogi_Travels.dto.GoogleLoginRequest;
+import com.example.Adiyogi_Travels.service.GoogleAuthService;
 @RestController
 @RequestMapping("/api/account")
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class AccountController {
     private final JwtService jwtService;
     private final OtpService otpService;
     private final EmailService emailService;
+    private final GoogleAuthService googleAuthService;
 
 
     @PostMapping("/register")
@@ -293,5 +295,31 @@ public class AccountController {
                         "Password updated successfully."
                 )
         );
+    }
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(
+            @Valid @RequestBody GoogleLoginRequest request
+    ) {
+
+        try {
+
+            LoginResponse response =
+                    googleAuthService.loginWithGoogle(
+                            request.getIdToken()
+                    );
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity
+                    .status(401)
+                    .body(
+                            Map.of(
+                                    "message",
+                                    e.getMessage()
+                            )
+                    );
+        }
     }
 }

@@ -41,7 +41,8 @@ public class SecurityConfig {
                                 "/api/account/resend-otp",
                                 "/api/account/forgot-password",
                                 "/api/account/verify-forgot-password-otp",
-                                "/api/account/reset-password"
+                                "/api/account/reset-password",
+                                "/api/account/google"
                         ).permitAll()
 
                         .requestMatchers("/api/account/me")
@@ -73,8 +74,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/destinations",
-                                "/api/destinations/**"
+                                "/destinations",
+                                "/destinations/**"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
