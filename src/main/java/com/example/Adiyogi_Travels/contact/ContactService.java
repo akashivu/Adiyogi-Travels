@@ -1,64 +1,29 @@
 package com.example.Adiyogi_Travels.contact;
 
-
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import com.example.Adiyogi_Travels.repository.ContactMessageRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ContactService {
 
-    private final JavaMailSender mailSender;
+    private final ContactMessageRepository repository;
 
-    @Value("${spring.mail.username}")
-    private String receiverEmail;
-
-    public ContactService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public ContactService(ContactMessageRepository repository) {
+        this.repository = repository;
     }
 
-    public void sendContactMessage(ContactRequest request) {
+    @Transactional
+    public ContactMessage saveMessage(ContactRequest request) {
 
-        SimpleMailMessage mail = new SimpleMailMessage();
+        ContactMessage contactMessage =
+                new ContactMessage(
+                        request.name().trim(),
+                        request.email().trim().toLowerCase(),
+                        request.subject().trim(),
+                        request.message().trim()
+                );
 
-        mail.setTo(receiverEmail);
-
-        mail.setReplyTo(request.email());
-
-        mail.setSubject(
-                "Elixway Contact: " + request.subject()
-        );
-
-        mail.setText(
-                """
-                New message from Elixway Contact Form
-                =====================================
-
-                Name:
-                %s
-
-                Email:
-                %s
-
-                Subject:
-                %s
-
-                Message:
-                %s
-
-                =====================================
-                This message was submitted through
-                the Elixway website.
-                """.formatted(
-                        request.name(),
-                        request.email(),
-                        request.subject(),
-                        request.message()
-                )
-        );
-
-        mailSender.send(mail);
+        return repository.save(contactMessage);
     }
 }
